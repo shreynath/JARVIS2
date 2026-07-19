@@ -49,7 +49,11 @@ class ConsistencyChecker:
 
         for node_id in all_ids:
             if node_id != graph.root_id and node_id not in referenced_as_child:
-                if node_id in graph.components and graph.components[node_id].parent_id:
+                comp = graph.components.get(node_id)
+                if comp and (comp.parent_id or comp.parent_assembly_id):
+                    continue
+                asm = graph.assemblies.get(node_id)
+                if asm and asm.parent_id:
                     continue
                 report.add_issue(
                     "warning",
@@ -85,3 +89,7 @@ class ConsistencyChecker:
 
         if graph.root_id:
             dfs(graph.root_id)
+            for assembly in graph.assemblies.values():
+                for child_id in assembly.children:
+                    if child_id not in visited:
+                        dfs(child_id)

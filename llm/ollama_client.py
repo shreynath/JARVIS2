@@ -9,6 +9,9 @@ from typing import Any
 
 import requests
 
+from knowledge.decomposition.component_templates import COMPONENT_TEMPLATES
+from knowledge.functional.templates import resolve_functional_template
+
 
 class LLMProvider(ABC):
     """Abstract LLM transport."""
@@ -68,10 +71,12 @@ class DeterministicProvider(LLMProvider):
 
         if role == "intent":
             return json.dumps(_default_intent_response(user_prompt))
+        if role == "functional":
+            return json.dumps(_default_functional_response(user_prompt))
         if role == "architect":
             return json.dumps(_default_architect_response(user_prompt))
         if role == "critic":
-            return json.dumps(_default_critic_response())
+            return json.dumps(_default_critic_response(user_prompt))
         if role == "engineer":
             return json.dumps(_default_engineer_response())
         return json.dumps({"error": "no deterministic response"})
@@ -82,6 +87,8 @@ class DeterministicProvider(LLMProvider):
 
 def _detect_role(system_prompt: str) -> str:
     lower = system_prompt.lower()
+    if "functional architect" in lower or "functional decomposition" in lower:
+        return "functional"
     if "intent" in lower and "extract" in lower:
         return "intent"
     if "architect" in lower or "decompose" in lower:
@@ -95,6 +102,33 @@ def _detect_role(system_prompt: str) -> str:
 
 def _default_intent_response(user_prompt: str) -> dict[str, Any]:
     lower = user_prompt.lower()
+
+    if "gearbox" in lower or "transmission" in lower:
+        return {
+            "object_type": "gearbox",
+            "design_goal": "multi-speed gearbox specification",
+            "reference_objects": [],
+            "constraints": [
+                {"type": "torque_capacity", "description": "High torque transmission", "priority": "high"},
+                {"type": "efficiency", "description": "Minimal power loss", "priority": "high"},
+            ],
+            "unknowns": ["gear_ratios", "input_speed", "lubrication_type"],
+            "required_domains": ["mechanical_design", "materials", "tribology"],
+        }
+
+    if "aircraft" in lower or "turbofan" in lower or "jet engine" in lower:
+        return {
+            "object_type": "turbofan_engine",
+            "design_goal": "commercial aircraft turbofan engine specification",
+            "reference_objects": ["CFM56", "GE90"],
+            "constraints": [
+                {"type": "thrust", "description": "High takeoff thrust", "priority": "critical"},
+                {"type": "fuel_efficiency", "description": "Low specific fuel consumption", "priority": "high"},
+            ],
+            "unknowns": ["bypass_ratio", "turbine_inlet_temperature", "overall_pressure_ratio"],
+            "required_domains": ["thermodynamics", "fluid_dynamics", "materials", "structural_analysis"],
+        }
+
     object_type = "internal_combustion_engine"
     if "ferrari" in lower:
         reference = ["Ferrari V12 engines"]
@@ -119,34 +153,49 @@ def _default_intent_response(user_prompt: str) -> dict[str, Any]:
     }
 
 
+def _default_functional_response(user_prompt: str) -> dict[str, Any]:
+    lower = user_prompt.lower()
+    object_type = "internal_combustion_engine"
+    if "gearbox" in lower:
+        object_type = "gearbox"
+    elif "aircraft" in lower or "turbofan" in lower:
+        object_type = "turbofan_engine"
+
+    template = resolve_functional_template(object_type, lower)
+    if template is None:
+        return {"primary_function": "unknown", "functions": [], "flows": [], "required_assemblies": [], "required_domains": []}
+    return template.model_dump()
+
+
 def _default_architect_response(user_prompt: str) -> dict[str, Any]:
     lower = user_prompt.lower()
-    if "root" in lower or "engine" in lower and "expand" not in lower:
-        return {
-            "nodes": [
-                {"id": "block_assembly", "name": "Block Assembly", "function": "Houses cylinders and crankshaft", "material": "Aluminum alloy", "complexity_score": 3.0},
-                {"id": "crankshaft_assembly", "name": "Crankshaft Assembly", "function": "Converts reciprocating to rotational motion", "material": "Forged steel", "complexity_score": 2.5},
-                {"id": "cylinder_head_assembly", "name": "Cylinder Head Assembly", "function": "Seals combustion chambers and houses valves", "material": "Aluminum alloy", "complexity_score": 3.0},
-                {"id": "fuel_system", "name": "Fuel System", "function": "Delivers fuel to combustion chambers", "material": None, "complexity_score": 2.0},
-                {"id": "cooling_system", "name": "Cooling System", "function": "Maintains operating temperature", "material": None, "complexity_score": 2.0},
-                {"id": "lubrication_system", "name": "Lubrication System", "function": "Reduces friction and removes heat", "material": None, "complexity_score": 1.5},
-                {"id": "electrical_system", "name": "Electrical System", "function": "Ignition and engine management", "material": None, "complexity_score": 1.5},
-            ]
-        }
-    if "block_assembly" in lower:
-        return {
-            "nodes": [
-                {"id": "engine_block", "name": "Engine Block", "function": "Structural housing for combustion cylinders", "material": "Aluminum alloy", "complexity_score": 1.0, "is_leaf": True},
-                {"id": "cylinder_bores", "name": "Cylinder Bores", "function": "Guides piston motion", "material": "Cast iron liners", "complexity_score": 0.8, "is_leaf": True},
-                {"id": "water_jackets", "name": "Water Jackets", "function": "Coolant flow passages", "material": "Aluminum alloy", "complexity_score": 0.8, "is_leaf": True},
-                {"id": "main_bearing_supports", "name": "Main Bearing Supports", "function": "Support crankshaft rotation", "material": "Aluminum alloy", "complexity_score": 0.8, "is_leaf": True},
-            ]
-        }
-    return {"nodes": [{"id": "sub_component", "name": "Sub Component", "function": "Generic sub-component", "material": "Steel", "complexity_score": 0.5, "is_leaf": True}]}
+    for assembly_id, components in COMPONENT_TEMPLATES.items():
+        if f"id={assembly_id}" in lower or f"id={assembly_id}," in lower:
+            return {"nodes": components}
+    return {"nodes": []}
 
 
-def _default_critic_response() -> dict[str, Any]:
-    return {"issues": []}
+def _default_critic_response(user_prompt: str) -> dict[str, Any]:
+    return {
+        "issues": [
+            {
+                "id": "critic_llm_1",
+                "node_id": "root",
+                "description": "Why aluminum block without quantified thermal margin?",
+                "severity": "warning",
+                "category": "assumption",
+                "suggested_fix": "Add thermal constraint with maximum operating temperature",
+            },
+            {
+                "id": "critic_llm_2",
+                "node_id": "root",
+                "description": "Displacement and cylinder count not specified",
+                "severity": "warning",
+                "category": "completeness",
+                "suggested_fix": "Document displacement assumption or extract from requirements",
+            },
+        ]
+    }
 
 
 def _default_engineer_response() -> dict[str, Any]:

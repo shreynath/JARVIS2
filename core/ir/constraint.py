@@ -29,14 +29,24 @@ class ConstraintSpec(BaseModel):
     value: str | float | None = None
 
 
+class ConstraintSeverity(StrEnum):
+    HARD_LIMIT = "hard_limit"
+    SOFT_LIMIT = "soft_limit"
+    GOAL = "goal"
+
+
 class Constraint(BaseModel):
     """A constraint applied to a design graph node."""
 
     id: str
     type: str
     description: str
+    component_id: str | None = None
     priority: ConstraintPriority = ConstraintPriority.MEDIUM
     value: str | float | None = None
+    unit: str | None = None
+    severity: ConstraintSeverity = ConstraintSeverity.HARD_LIMIT
+    goal: str | None = None  # minimize, maximize, meet
     source: str = "intent"
 
 
@@ -90,3 +100,21 @@ class CriticIssue(BaseModel):
     severity: Severity
     category: str = "consistency"
     suggested_fix: str = ""
+
+
+class ConstraintEvaluation(BaseModel):
+    """Canonical evaluation of one engineering constraint — whether it is satisfied.
+
+    Every subsystem that can produce a hard constraint must emit this shape.
+    The validator aggregates hard_violations exclusively from this type.
+    """
+
+    id: str
+    severity: ConstraintSeverity
+    value: float | str
+    limit: float | str | None = None
+    passes: bool
+    source: str
+    component_id: str | None = None
+    dependency_ids: list[str] = Field(default_factory=list)
+    description: str = ""

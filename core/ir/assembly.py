@@ -14,8 +14,12 @@ class AssemblyNode(BaseModel):
     name: str
     type: str = "assembly"
     function: str
+    purpose: str = ""
+    justification: str = ""
+    children: list[str] = Field(default_factory=list)
     member_ids: list[str] = Field(default_factory=list)
     parent_id: str | None = None
+    serves_functions: list[str] = Field(default_factory=list)
     constraints: list[Constraint] = Field(default_factory=list)
     requirements: list[Requirement] = Field(default_factory=list)
     interfaces: list[Interface] = Field(default_factory=list)

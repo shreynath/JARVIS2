@@ -5,6 +5,8 @@ import json
 from core.ir.component import ComponentNode
 from core.ir.constraint import Assumption, ConstraintSpec
 from core.ir.design_graph import EngineeringDesignGraph, EngineeringIntent
+from core.reasoning.pipeline import SemanticKernelPipeline
+from llm.ollama_client import DeterministicProvider
 
 
 def _sample_intent() -> EngineeringIntent:
@@ -84,3 +86,55 @@ def test_design_graph_to_spec_dict():
 def test_constraint_spec():
     cs = ConstraintSpec(type="performance", description="High power", priority="high")
     assert cs.priority == "high"
+
+
+def test_constraint_graph_contains_physics_and_material_constraints():
+    result = SemanticKernelPipeline(provider=DeterministicProvider()).run(
+        "Design a 9000 RPM naturally aspirated V12 engine producing 800 hp"
+    )
+
+    node_ids = set(result.constraint_graph.nodes)
+    assert "constraint_physics_rod_stress" in node_ids
+    assert any(node_id.startswith("constraint_thermal_") for node_id in node_ids)
+    assert any(
+        edge.source_id == "constraint_physics_rod_stress"
+        and edge.target_id == "connecting_rods"
+        for edge in result.constraint_graph.edges
+    )
+
+
+def test_thermal_constraint_edges_have_component_specific_causality():
+    result = SemanticKernelPipeline(provider=DeterministicProvider()).run(
+        "Design a 9000 RPM naturally aspirated V12 producing 800 horsepower."
+    )
+
+    def thermal_trace_description(component_id: str) -> str:
+        thermal_constraint_ids = [
+            edge.source_id
+            for edge in result.constraint_graph.edges
+            if edge.edge_type == "constraint_applies_to"
+            and edge.target_id == component_id
+            and edge.source_id.startswith("constraint_thermal_")
+        ]
+        assert thermal_constraint_ids
+        trace = next(
+            edge
+            for edge in result.constraint_graph.edges
+            if edge.edge_type == "traces_to" and edge.target_id == thermal_constraint_ids[0]
+        )
+        return trace.description
+
+    radiator = thermal_trace_description("radiator")
+    crankshaft = thermal_trace_description("crankshaft")
+    valves = thermal_trace_description("valves")
+    camshaft = thermal_trace_description("camshaft")
+    oil_pan = thermal_trace_description("oil_pan")
+
+    assert "combustion heat rejection" in radiator
+    assert "friction/mechanical-load heating" in crankshaft
+    assert "combustion/exhaust gas exposure" in valves
+    assert "friction/mechanical-load heating" in camshaft
+    assert "combustion/exhaust gas exposure" not in camshaft
+    assert "local operating thermal environment" not in oil_pan
+    assert "proximity heat" in oil_pan
+    assert len({radiator, crankshaft, valves, camshaft, oil_pan}) == 5

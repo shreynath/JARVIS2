@@ -2,11 +2,19 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from pydantic import BaseModel, Field
 
 from core.ir.assembly import AssemblyNode
 from core.ir.component import ComponentNode
 from core.ir.constraint import Assumption, ConstraintSpec
+from core.ir.constraint_graph import ConstraintGraph
+from core.ir.functional import FunctionalAnalysis
+
+if TYPE_CHECKING:
+    from core.ir.requirement_spec import RequirementSpecification
+    from core.reasoning.physics_engine import PhysicsAnalysis
 
 
 class EngineeringIntent(BaseModel):
@@ -31,6 +39,7 @@ class EngineeringDesignGraph(BaseModel):
     assemblies: dict[str, AssemblyNode] = Field(default_factory=dict)
     assumptions: list[Assumption] = Field(default_factory=list)
     root_id: str = ""
+    functional_analysis: FunctionalAnalysis | None = None
     metadata: dict[str, str | float | int | bool] = Field(default_factory=dict)
 
     def all_node_ids(self) -> set[str]:
@@ -47,8 +56,12 @@ class EngineeringDesignGraph(BaseModel):
     def add_assembly(self, assembly: AssemblyNode) -> None:
         self.assemblies[assembly.id] = assembly
 
-    def to_spec_dict(self) -> dict:
-        """Serialize to the Phase 1 output format."""
+    def to_spec_dict(
+        self,
+        requirement_spec: RequirementSpecification | None = None,
+        physics_analysis: PhysicsAnalysis | None = None,
+        constraint_graph: ConstraintGraph | None = None,
+    ) -> dict:
 
         def _serialize_component(comp: ComponentNode) -> dict:
             entry: dict = {
@@ -56,17 +69,24 @@ class EngineeringDesignGraph(BaseModel):
                 "name": comp.name,
                 "type": comp.type,
                 "function": comp.function,
+                "purpose": comp.purpose,
+                "justification": comp.justification,
             }
             if comp.material:
                 entry["material"] = comp.material
-            if comp.children:
-                entry["children"] = comp.children
+            if comp.material_spec:
+                entry["material_spec"] = comp.material_spec.model_dump()
+            if comp.parent_assembly_id:
+                entry["parent_assembly_id"] = comp.parent_assembly_id
+            if comp.serves_function_id:
+                entry["serves_function_id"] = comp.serves_function_id
+            if comp.constraints:
+                entry["constraints"] = [c.model_dump() for c in comp.constraints]
             if comp.is_leaf:
                 entry["is_leaf"] = True
             return entry
 
-        root = self.components.get(self.root_id) or self.assemblies.get(self.root_id)
-        return {
+        result: dict = {
             "name": self.name,
             "type": self.type,
             "root_id": self.root_id,
@@ -75,3 +95,20 @@ class EngineeringDesignGraph(BaseModel):
             "assumption_count": len(self.assumptions),
             "intent": self.intent.model_dump(),
         }
+
+        if self.functional_analysis:
+            result["functional_analysis"] = self.functional_analysis.model_dump()
+
+        if requirement_spec:
+            result["requirement_specification"] = requirement_spec.model_dump()
+
+        if physics_analysis:
+            result["physics_analysis"] = physics_analysis.model_dump()
+
+        if constraint_graph:
+            result["constraint_graph"] = {
+                "nodes": [n.model_dump() for n in constraint_graph.nodes.values()],
+                "edges": [e.model_dump() for e in constraint_graph.edges],
+            }
+
+        return result

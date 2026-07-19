@@ -31,8 +31,15 @@ def main() -> None:
     print(f"Assumptions: {len(result.graph.assumptions)}")
     print(f"Critic issues: {len(result.critic_issues)}")
     if result.validation_report:
-        status = "PASSED" if result.validation_report.passed else "FAILED"
-        print(f"Validation: {status} ({len(result.validation_report.issues)} issues)")
+        print(
+            "Validation: "
+            f"{result.validation_report.status.upper()} "
+            f"(hard violations: {result.validation_report.hard_violations}, "
+            f"warnings: {result.validation_report.warnings}, "
+            f"missing decisions: {result.validation_report.missing_decisions}, "
+            f"unverified assumptions: {result.validation_report.unverified_assumptions}, "
+            f"unvalidated hard limits: {result.validation_report.unvalidated_hard_limits})"
+        )
     print(f"\nOutput written to {output_dir}/")
 
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 from pydantic import BaseModel, Field
 
 from core.ir.constraint import Constraint, FailureMode, Interface, Requirement
+from core.ir.material import MaterialSpec
 
 
 class ComponentNode(BaseModel):
@@ -14,9 +15,14 @@ class ComponentNode(BaseModel):
     name: str
     type: str = "component"
     function: str
+    purpose: str = ""
+    justification: str = ""
     material: str | None = None
+    material_spec: MaterialSpec | None = None
     children: list[str] = Field(default_factory=list)
     parent_id: str | None = None
+    parent_assembly_id: str | None = None
+    serves_function_id: str | None = None
     constraints: list[Constraint] = Field(default_factory=list)
     requirements: list[Requirement] = Field(default_factory=list)
     interfaces: list[Interface] = Field(default_factory=list)
