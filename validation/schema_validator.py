@@ -1,4 +1,9 @@
-"""Validation report and schema validation."""
+"""Validation report and schema validation.
+
+``SchemaValidator`` performs **self_consistency_check** only — it validates
+the design graph against the IR Pydantic schema. It is not ``externally_verified``.
+Adversarial rejection tests: ``tests/validator_adversarial/test_schema_validator.py``.
+"""
 
 from __future__ import annotations
 
@@ -6,6 +11,7 @@ from pydantic import BaseModel, Field
 
 from core.ir.constraint import ConstraintEvaluation
 from core.ir.design_graph import EngineeringDesignGraph
+from validation.integrity import VerificationCheckRecord, stamp_validator
 
 
 class ValidationIssue(BaseModel):
@@ -26,6 +32,7 @@ class ValidationReport(BaseModel):
     unvalidated_hard_limits: int = 0
     issues: list[ValidationIssue] = Field(default_factory=list)
     constraint_evaluations: list[ConstraintEvaluation] = Field(default_factory=list)
+    verification_checks: list[VerificationCheckRecord] = Field(default_factory=list)
 
     def add_issue(self, severity: str, category: str, message: str, node_id: str | None = None) -> None:
         self.issues.append(
@@ -67,6 +74,7 @@ class ValidationReport(BaseModel):
         self.unverified_assumptions += other.unverified_assumptions
         self.unvalidated_hard_limits += other.unvalidated_hard_limits
         self.constraint_evaluations.extend(other.constraint_evaluations)
+        self.verification_checks.extend(other.verification_checks)
         if not other.evaluation_complete:
             self.evaluation_complete = False
         if not other.passed:
@@ -90,7 +98,9 @@ class ValidationReport(BaseModel):
 
 
 class SchemaValidator:
-    """Validate graph against Pydantic schemas."""
+    """Validate graph against Pydantic schemas (self_consistency_check)."""
+
+    VALIDATOR_ID = "SchemaValidator"
 
     def validate(self, graph: EngineeringDesignGraph) -> ValidationReport:
         report = ValidationReport()
@@ -107,4 +117,5 @@ class SchemaValidator:
         if not graph.components:
             report.add_issue("critical", "schema", "Graph has no components")
 
+        stamp_validator(report, self.VALIDATOR_ID)
         return report

@@ -38,7 +38,13 @@ class MaterialAssigner:
     """Assign MaterialSpec only when a computed requirement exists for the component role."""
 
     _ROLE_CANDIDATES: dict[str, list[str]] = {
-        ComponentRole.STRUCTURAL_LOAD_PATH.value: ["forged_steel_4340", "ti_6al4v"],
+        ComponentRole.STRUCTURAL_LOAD_PATH.value: [
+            "forged_steel_4340",
+            "structural_steel_astm_a572",
+            "al_6061_t6",
+            "hardwood_oak",
+            "ti_6al4v",
+        ],
         ComponentRole.ROTATING_MASS.value: [
             "forged_steel_4340",
             "nitrided_steel",
@@ -61,6 +67,20 @@ class MaterialAssigner:
         "crankshaft": ["forged_steel_4340", "nitrided_steel", "ti_6al4v"],
         "camshaft": ["forged_steel_4340", "nitrided_steel", "ti_6al4v"],
         "main_bearings": ["forged_steel_4340", "nitrided_steel", "ti_6al4v"],
+        "top_chord": ["structural_steel_astm_a572"],
+        "bottom_chord": ["structural_steel_astm_a572"],
+        "web_diagonals": ["structural_steel_astm_a572"],
+        "verticals": ["structural_steel_astm_a572"],
+        "stringers": ["structural_steel_astm_a572"],
+        "top_tube": ["al_6061_t6", "ti_6al4v"],
+        "down_tube": ["al_6061_t6", "ti_6al4v"],
+        "seat_tube": ["al_6061_t6", "ti_6al4v"],
+        "seat_stays": ["al_6061_t6", "ti_6al4v"],
+        "chain_stays": ["al_6061_t6", "ti_6al4v"],
+        "front_legs": ["hardwood_oak"],
+        "rear_legs": ["hardwood_oak"],
+        "stretchers": ["hardwood_oak"],
+        "seat_rails": ["hardwood_oak"],
     }
 
     def __init__(self) -> None:
@@ -289,20 +309,28 @@ class MaterialAssigner:
     ) -> MaterialRequirement | None:
         """Only emit requirements backed by computed physics — no fixed theater floors."""
         rod_stress = self._computed_value(physics_analysis, "calc_rod_stress_requirement")
+        truss_stress = self._computed_value(physics_analysis, "calc_truss_member_stress")
         combustion_temp = self._computed_value(physics_analysis, "calc_combustion_side_temperature")
 
         if role == ComponentRole.STRUCTURAL_LOAD_PATH:
-            if rod_stress is None:
+            stress_value = truss_stress if truss_stress is not None else rod_stress
+            if stress_value is None:
                 return None
-            stress = float(rod_stress)
+            stress = float(stress_value)
+            source = (
+                "calc_truss_member_stress"
+                if truss_stress is not None
+                else "calc_rod_stress_requirement"
+            )
+            mass_sensitive = source == "calc_rod_stress_requirement"
             return MaterialRequirement(
                 role=role.value,
                 required_yield_mpa=stress * 1.25,
                 required_fatigue_mpa=stress * 0.65,
                 required_temperature_c=160.0,
-                mass_sensitive=True,
-                source="calc_rod_stress_requirement",
-                evidence_calc_ids=("calc_rod_stress_requirement",),
+                mass_sensitive=mass_sensitive,
+                source=source,
+                evidence_calc_ids=(source,),
             )
 
         if role == ComponentRole.ROTATING_MASS:

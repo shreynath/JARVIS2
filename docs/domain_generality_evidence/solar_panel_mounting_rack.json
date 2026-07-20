@@ -1,0 +1,339 @@
+{
+  "prompt": "design a solar panel mounting rack",
+  "expected_family": "solar_panel_mounting_rack",
+  "intent": {
+    "object_type": "solar_panel_mounting_rack",
+    "design_goal": "Provide a structural solution that securely mounts solar panels on a building or ground platform, allowing for optimal tilt and orientation while meeting safety, durability, and cost criteria.",
+    "reference_objects": [],
+    "constraints": [
+      {
+        "type": "structural_stability",
+        "description": "Must support the weight of the panels and environmental loads (wind, snow, seismic) without excessive deflection or failure.",
+        "priority": "critical",
+        "value": null
+      },
+      {
+        "type": "corrosion_resistance",
+        "description": "Should use materials or coatings suitable for the local environment to avoid degradation.",
+        "priority": "high",
+        "value": null
+      },
+      {
+        "type": "cost_limit",
+        "description": "Design should be cost-effective relative to the budget for the installation project.",
+        "priority": "medium",
+        "value": null
+      },
+      {
+        "type": "installation_compatibility",
+        "description": "Must be compatible with the intended mounting platform (roof type, ground, wall) and installation practices.",
+        "priority": "high",
+        "value": null
+      }
+    ],
+    "unknowns": [
+      "roof_type",
+      "roof_cant",
+      "panel_dimensions_and_weight",
+      "required_tilt_angle_and_orientation",
+      "environmental_loads_e.g._wind_speed",
+      "environmental_loads_e.g._snow_load",
+      "environmental_loads_e.g._seismic_regime",
+      "location_specific_corrosion_factor",
+      "budget_limits",
+      "installation_method_time_constraints"
+    ],
+    "required_domains": [
+      "structural_analysis",
+      "mechanical_design",
+      "materials",
+      "civil_engineering",
+      "environmental_engineering"
+    ],
+    "raw_input": "design a solar panel mounting rack"
+  },
+  "requirement_spec": {
+    "status": "complete",
+    "object_type": "solar_panel_mounting_rack",
+    "design_goal": "Provide a structural solution that securely mounts solar panels on a building or ground platform, allowing for optimal tilt and orientation while meeting safety, durability, and cost criteria.",
+    "requirements": [
+      {
+        "id": "req_object_type",
+        "description": "Design object type resolved as solar_panel_mounting_rack",
+        "metric": "object_type",
+        "target_value": "solar_panel_mounting_rack",
+        "unit": null,
+        "priority": "critical",
+        "source": "intent_parser",
+        "originating_text": "design a solar panel mounting rack",
+        "affected_assemblies": [
+          "root"
+        ],
+        "affected_components": [],
+        "downstream_design_consequences": [
+          "Selects functional decomposition template",
+          "Defines required engineering decision set",
+          "Initializes constraint graph even when numeric targets are absent"
+        ],
+        "derived_from": [],
+        "satisfies_decisions": [
+          "object_type"
+        ]
+      }
+    ],
+    "required_decisions": [],
+    "resolved_parameters": {},
+    "reference_profile": null,
+    "completeness_rationale": "All required engineering decisions resolved from prompt.",
+    "unrecognized_terms": [],
+    "conflicts": [],
+    "implausible_parameters": []
+  },
+  "functional_analysis": {
+    "primary_function": "Provide a structurally reliable and cost-effective mounting rack that securely supports solar panels, allows optimal tilt and orientation, and is compatible with roof, wall, or ground installations while resisting environmental loads and corrosion.",
+    "functions": [
+      {
+        "id": "f1",
+        "name": "load_transmission",
+        "description": "Transmit the weight of the panels and induced loads to the mounting connection points.",
+        "requires": [],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "f2",
+        "name": "structural_resistance",
+        "description": "Maintain structural integrity against static and dynamic environmental loads (wind, snow, seismic) with acceptable deflection and failure limits.",
+        "requires": [
+          "f1"
+        ],
+        "domain": "structural_analysis"
+      },
+      {
+        "id": "f3",
+        "name": "tilt_orientation_control",
+        "description": "Provide mechanisms to adjust and lock the tilt and azimuth angle of the mounted panels for optimal solar tracking.",
+        "requires": [],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "f4",
+        "name": "mounting_connection",
+        "description": "Create a robust interface to secure the rack to the roof, wall, or ground substrate.",
+        "requires": [
+          "f1"
+        ],
+        "domain": "civil_engineering"
+      },
+      {
+        "id": "f5",
+        "name": "corrosion_protection",
+        "description": "Select and apply materials or coatings that resist corrosion under the local environmental conditions.",
+        "requires": [],
+        "domain": "materials"
+      },
+      {
+        "id": "f6",
+        "name": "installation_compatibility",
+        "description": "Ensure the rack design aligns with standard installation practices for the intended mounting substrate.",
+        "requires": [
+          "f4"
+        ],
+        "domain": "civil_engineering"
+      },
+      {
+        "id": "f7",
+        "name": "cost_control",
+        "description": "Optimize material usage and manufacturing steps to keep the rack within the project budget.",
+        "requires": [],
+        "domain": "mechanical_design"
+      }
+    ],
+    "flows": [
+      {
+        "id": "fl1",
+        "flow_type": "information",
+        "source_function_id": "f1",
+        "target_function_id": "f2",
+        "description": "Load path data from the transmission system informs structural analysis."
+      },
+      {
+        "id": "fl2",
+        "flow_type": "information",
+        "source_function_id": "f3",
+        "target_function_id": "f1",
+        "description": "Adjustment data changes the load distribution to the transmission system."
+      },
+      {
+        "id": "fl3",
+        "flow_type": "information",
+        "source_function_id": "f4",
+        "target_function_id": "f6",
+        "description": "Mounting connection details are used by the installation compatibility evaluator."
+      },
+      {
+        "id": "fl4",
+        "flow_type": "material",
+        "source_function_id": "f5",
+        "target_function_id": "f1",
+        "description": "Corrosion\u2013resistant material specifications are supplied to the load transmission components."
+      },
+      {
+        "id": "fl5",
+        "flow_type": "material",
+        "source_function_id": "f5",
+        "target_function_id": "f4",
+        "description": "Corrosion\u2013resistant material specifications are supplied to the anchoring system."
+      },
+      {
+        "id": "fl6",
+        "flow_type": "information",
+        "source_function_id": "f7",
+        "target_function_id": "f1",
+        "description": "Cost constraint data influences material selection for the load transmission parts."
+      },
+      {
+        "id": "fl7",
+        "flow_type": "information",
+        "source_function_id": "f7",
+        "target_function_id": "f2",
+        "description": "Cost constraint data influences overall structural design."
+      },
+      {
+        "id": "fl8",
+        "flow_type": "information",
+        "source_function_id": "f7",
+        "target_function_id": "f3",
+        "description": "Cost constraint data influences the design of the tilt/orientation mechanism."
+      },
+      {
+        "id": "fl9",
+        "flow_type": "information",
+        "source_function_id": "f7",
+        "target_function_id": "f4",
+        "description": "Cost constraint data influences the anchoring system design."
+      }
+    ],
+    "required_assemblies": [
+      {
+        "id": "a1",
+        "name": "Panel Mount Interface",
+        "function": "load_transmission, tilt_orientation_control",
+        "purpose": "Attach solar panels and allow adjustment of angle.",
+        "serves_functions": [
+          "f1",
+          "f3"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "a2",
+        "name": "Support Frame",
+        "function": "structural_resistance, load_transmission",
+        "purpose": "Provide the main structural backbone of the rack.",
+        "serves_functions": [
+          "f1",
+          "f2"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "a3",
+        "name": "Anchoring System",
+        "function": "mounting_connection, load_transmission",
+        "purpose": "Secure the rack to the building or ground substrate.",
+        "serves_functions": [
+          "f1",
+          "f4",
+          "f6"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "a4",
+        "name": "Corrosion Protection Module",
+        "function": "corrosion_protection",
+        "purpose": "Apply corrosion\u2011resistant coatings or select materials.",
+        "serves_functions": [
+          "f5"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "a5",
+        "name": "Cost Control Subsystem",
+        "function": "cost_control",
+        "purpose": "Track and constrain total system cost.",
+        "serves_functions": [
+          "f7"
+        ],
+        "parent_assembly_id": "root"
+      }
+    ],
+    "required_domains": [
+      "structural_analysis",
+      "mechanical_design",
+      "materials",
+      "civil_engineering",
+      "environmental_engineering"
+    ]
+  },
+  "component_ids": [
+    "panel_mount_plate",
+    "tilt_adjustment_rod",
+    "locking_torque_hub",
+    "corrosion_resistant_bolts",
+    "mr_rail_main",
+    "mr_cross_member",
+    "mr_vertical_post",
+    "mr_gusset_plate",
+    "mr_shear_gusset",
+    "mr_beam_connector",
+    "cylindrical_roller_bearing_6206",
+    "steel_angular_shaft_link",
+    "spur_gear_20t_gear_hub",
+    "polyurea_gearbox_housing",
+    "epoxy_rotary_seal",
+    "epoxy_precoat_plate",
+    "hot_dip_galvanized_plate",
+    "zinc_sacrificial_anode",
+    "epdm_sealing_gasket",
+    "alkaline_zinc_phosphate_coat",
+    "cost_estimation_module",
+    "material_cost_selector",
+    "procurement_strategy_unit",
+    "manufacturing_process_optimizer",
+    "lifecycle_cost_manager"
+  ],
+  "component_names": [
+    "Panel Mount Plate",
+    "Tilt Adjustment Rod",
+    "Locking Torque Hub",
+    "Corrosion-Resistant Mounting Bolts",
+    "Main Rail Beam",
+    "Cross Member Beam",
+    "Vertical Support Post",
+    "Gusset Plate Assembly",
+    "Shear Gusset Assembly",
+    "Beam Connector Fasteners",
+    "Cylindrical Roller Bearing 6206",
+    "Angular Contact Shaft Link",
+    "Spur Gear 20-tooth Gear Hub",
+    "Polyurea Gearbox Housing",
+    "Epoxy Rotary Seal",
+    "Epoxy Precoat Application Plate",
+    "Hot-Dip Galvanized Steel Plate",
+    "Zinc Sacrificial Anode Module",
+    "EPDM Sealing Gasket",
+    "Alkaline Zinc Phosphate Paint",
+    "Cost Estimation Module",
+    "Material Cost Selector",
+    "Procurement Strategy Unit",
+    "Manufacturing Process Optimizer",
+    "Lifecycle Cost Manager"
+  ],
+  "physics_warnings": [
+    "No physics module registered for object_type='solar_panel_mounting_rack'; ICE PhysicsEngine was not invoked."
+  ],
+  "provider_used": "ollama:gpt-oss:20b",
+  "degraded": false
+}

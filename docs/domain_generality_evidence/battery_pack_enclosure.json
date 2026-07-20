@@ -1,0 +1,354 @@
+{
+  "prompt": "design a lithium-ion battery pack enclosure",
+  "expected_family": "battery_pack_enclosure",
+  "intent": {
+    "object_type": "battery_pack_enclosure",
+    "design_goal": "Design a lithium-ion battery pack enclosure",
+    "reference_objects": [],
+    "constraints": [
+      {
+        "type": "safety",
+        "description": "Must meet relevant battery containment and fire suppression standards (e.g., UL 2054, IEC 62133).",
+        "priority": "critical",
+        "value": null
+      },
+      {
+        "type": "thermal_management",
+        "description": "Maintain battery temperature within safe operating range using passive or active cooling methods.",
+        "priority": "critical",
+        "value": null
+      },
+      {
+        "type": "mechanical_strength",
+        "description": "Withstand shock, vibration, and compression forces typical of the intended application.",
+        "priority": "high",
+        "value": null
+      },
+      {
+        "type": "weight",
+        "description": "Minimize overall mass of the enclosure while meeting structural requirements.",
+        "priority": "medium",
+        "value": null
+      },
+      {
+        "type": "form_factor",
+        "description": "Fit within specified chassis dimensions and allow easy access to cells and connectors.",
+        "priority": "medium",
+        "value": null
+      }
+    ],
+    "unknowns": [
+      "Number and arrangement of lithium-ion cells",
+      "Desired cooling method (ambient, forced air, liquid cooling)",
+      "Specific mounting/interface requirements",
+      "Material preferences or cost constraints"
+    ],
+    "required_domains": [
+      "mechanical_design",
+      "materials",
+      "thermal_management",
+      "electrical",
+      "safety",
+      "thermal"
+    ],
+    "raw_input": "design a lithium-ion battery pack enclosure"
+  },
+  "requirement_spec": {
+    "status": "complete",
+    "object_type": "battery_pack_enclosure",
+    "design_goal": "Design a lithium-ion battery pack enclosure",
+    "requirements": [
+      {
+        "id": "req_object_type",
+        "description": "Design object type resolved as battery_pack_enclosure",
+        "metric": "object_type",
+        "target_value": "battery_pack_enclosure",
+        "unit": null,
+        "priority": "critical",
+        "source": "intent_parser",
+        "originating_text": "design a lithium-ion battery pack enclosure",
+        "affected_assemblies": [
+          "root"
+        ],
+        "affected_components": [],
+        "downstream_design_consequences": [
+          "Selects functional decomposition template",
+          "Defines required engineering decision set",
+          "Initializes constraint graph even when numeric targets are absent"
+        ],
+        "derived_from": [],
+        "satisfies_decisions": [
+          "object_type"
+        ]
+      }
+    ],
+    "required_decisions": [],
+    "resolved_parameters": {},
+    "reference_profile": null,
+    "completeness_rationale": "All required engineering decisions resolved from prompt.",
+    "unrecognized_terms": [],
+    "conflicts": [],
+    "implausible_parameters": []
+  },
+  "functional_analysis": {
+    "primary_function": "Provide a safe, lightweight, and thermally controlled enclosure for a lithium\u2011ion battery pack that meets relevant safety standards and allows easy access to cells and connectors.",
+    "functions": [
+      {
+        "id": "f1",
+        "name": "Contain and secure battery cells",
+        "description": "Maintain physical separation of individual battery cells and prevent movement or damage during use.",
+        "requires": [],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "f2",
+        "name": "Provide structural integrity against mechanical loads",
+        "description": "Withstand shock, vibration, and compression forces while maintaining enclosure shape.",
+        "requires": [
+          "f1"
+        ],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "f3",
+        "name": "Ensure compliance with battery safety standards",
+        "description": "Design for containment and fire suppression in accordance with UL\u202f2054, IEC\u202f62133, and related regulations.",
+        "requires": [
+          "f1",
+          "f2"
+        ],
+        "domain": "safety"
+      },
+      {
+        "id": "f4",
+        "name": "Suppress fire and thermal runaway",
+        "description": "Provide passive (barrier layers) and/or active (intelligent suppression) measures to contain and extinguish a battery fire.",
+        "requires": [
+          "f3"
+        ],
+        "domain": "safety"
+      },
+      {
+        "id": "f5",
+        "name": "Maintain battery temperature within safe limits",
+        "description": "Use cooling methods to keep the battery within its operating temperature range.",
+        "requires": [
+          "f4"
+        ],
+        "domain": "thermal_management"
+      },
+      {
+        "id": "f6",
+        "name": "Provide thermal conduction path from battery to cooling media",
+        "description": "Ensure efficient heat transfer from the cells to the cooling system.",
+        "requires": [
+          "f5"
+        ],
+        "domain": "thermal"
+      },
+      {
+        "id": "f7",
+        "name": "Implement active cooling and monitoring",
+        "description": "Provide active cooling channels, sensor interfaces, and control electronics for dynamic temperature management.",
+        "requires": [
+          "f5"
+        ],
+        "domain": "thermal_management"
+      },
+      {
+        "id": "f8",
+        "name": "Allow access to cells and connectors",
+        "description": "Design openings or panels that enable maintenance, inspection, or cell replacement without compromising containment.",
+        "requires": [
+          "f1"
+        ],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "f9",
+        "name": "Minimize weight",
+        "description": "Select materials and structural configurations that reduce mass while satisfying all higher\u2011level safety, mechanical, and thermal functions.",
+        "requires": [
+          "f1",
+          "f2",
+          "f3",
+          "f5"
+        ],
+        "domain": "mechanical_design"
+      }
+    ],
+    "flows": [
+      {
+        "id": "flow1",
+        "flow_type": "energy",
+        "source_function_id": "f5",
+        "target_function_id": "f6",
+        "description": "Heat generated by battery cells transferred to enclosure walls."
+      },
+      {
+        "id": "flow2",
+        "flow_type": "energy",
+        "source_function_id": "f6",
+        "target_function_id": "f7",
+        "description": "Heat conducted to active cooling system (e.g., liquid coolant or heat pipes)."
+      },
+      {
+        "id": "flow3",
+        "flow_type": "energy",
+        "source_function_id": "f7",
+        "target_function_id": "ambient",
+        "description": "Residual heat dissipated to the surrounding environment."
+      },
+      {
+        "id": "flow4",
+        "flow_type": "material",
+        "source_function_id": "f1",
+        "target_function_id": "f2",
+        "description": "Mechanical loads applied to structure during assembly and operation."
+      },
+      {
+        "id": "flow5",
+        "flow_type": "information",
+        "source_function_id": "f6",
+        "target_function_id": "f7",
+        "description": "Temperature sensor data sent to cooling control electronics."
+      },
+      {
+        "id": "flow6",
+        "flow_type": "material",
+        "source_function_id": "f7",
+        "target_function_id": "ambient",
+        "description": "Coolant or air removed after thermal exchange."
+      }
+    ],
+    "required_assemblies": [
+      {
+        "id": "assembly1",
+        "name": "Battery Containment Chamber",
+        "function": "Contain and secure battery cells",
+        "purpose": "Encapsulate the battery pack while preventing cell movement.",
+        "serves_functions": [
+          "f1"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "assembly2",
+        "name": "Structural Shell",
+        "function": "Provide mechanical strength and compliance",
+        "purpose": "Deliver stability against tolerable shock, vibration, and compression, and support safety features.",
+        "serves_functions": [
+          "f2",
+          "f3",
+          "f9"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "assembly3",
+        "name": "Fire Suppression Layer",
+        "function": "Suppress fire and thermal runaway",
+        "purpose": "Act as a barrier or active suppression medium when a fault occurs.",
+        "serves_functions": [
+          "f4"
+        ],
+        "parent_assembly_id": "assembly2"
+      },
+      {
+        "id": "assembly4",
+        "name": "Cooling System",
+        "function": "Thermal management and active cooling",
+        "purpose": "Transfer heat from battery cells to the external environment using conduction, convection, or active fluids.",
+        "serves_functions": [
+          "f5",
+          "f6",
+          "f7"
+        ],
+        "parent_assembly_id": "assembly2"
+      },
+      {
+        "id": "assembly5",
+        "name": "Access Panel",
+        "function": "Allow access to cells and connectors",
+        "purpose": "Enable maintenance operations while maintaining containment.",
+        "serves_functions": [
+          "f8"
+        ],
+        "parent_assembly_id": "assembly2"
+      }
+    ],
+    "required_domains": [
+      "mechanical_design",
+      "materials",
+      "thermal_management",
+      "thermal",
+      "electrical",
+      "safety"
+    ]
+  },
+  "component_ids": [
+    "cell_mounting_frame",
+    "cell_holder_panels",
+    "cell_spacer_inserts",
+    "sealing_gasket_assembly",
+    "access_hatch_alignment",
+    "shell_front_panel",
+    "shell_side_beam",
+    "shell_top_shell",
+    "fire_suppression_panel",
+    "composite_weight_reduction_layer",
+    "intumescent_lining",
+    "fire_retardant_fabric_shell",
+    "flame_retardant_polyurethane_fiberglass_core",
+    "heat_activated_fuse_system",
+    "thermal_gas_cooling_chamber",
+    "char_coating_packet",
+    "heat_pipe_array",
+    "heat_exchanger_block",
+    "coolant_pump",
+    "temperature_sensor_array",
+    "active_cooling_fan",
+    "control_electronics_unit",
+    "c1_access_panel_body",
+    "c2_hinge_mechanism",
+    "c3_latch_release",
+    "c4_gasket_sealing",
+    "c5_mounting_bracket",
+    "c6_access_keyhole"
+  ],
+  "component_names": [
+    "Aluminum 6061\u2011T6 Cell Mounting Frame",
+    "Aluminum 6061\u2011T6 Cell Holder Panels",
+    "High\u2011Temperature Polyimide (Kapton) Spacer Inserts",
+    "EPDM Sealing Gasket Assembly",
+    "Stainless Steel 304 Access Hatch Alignment Assembly",
+    "Front Structural Panel",
+    "Side Load\u2011Bearing Beam",
+    "Top Enclosure Shell",
+    "Intumescent Fire\u2011Suppression Layer",
+    "Carbon\u2011Fiber Composite Weight\u2011Reduction Layer",
+    "Intumescent Lining Panel",
+    "Charcoated Recycled Carbon-Fiber Fabric",
+    "Flame-Retardant Polyurethane Foam Core",
+    "Heat-Activated ThermoFuse Assembly",
+    "Passive Thermal Gas Cooling Chamber",
+    "Char-Coating Absorbent Pack",
+    "Copper Heat Pipe Array",
+    "Aluminum Heat Exchanger Block",
+    "Stainless Steel Coolant Pump",
+    "Thermocouple Sensor Array",
+    "Axial Cooling Fan",
+    "Thermal Management Control Board",
+    "Access Panel Body",
+    "Dual\u2011Hinge Assembly",
+    "Dual\u2011Position Latching Mechanism",
+    "Compression Gasket",
+    "Aluminum Mounting Bracket",
+    "Standardized Access Keyhole"
+  ],
+  "physics_warnings": [
+    "No physics module registered for object_type='battery_pack_enclosure'; ICE PhysicsEngine was not invoked."
+  ],
+  "provider_used": "ollama:gpt-oss:20b",
+  "degraded": false
+}

@@ -67,6 +67,31 @@ class PhysicsCalculation(BaseModel):
     model_maturity: str | None = None
 
 
+UNKNOWN_INPUT = "unknown"
+
+
+def _sanitize_calc_inputs(inputs: dict[str, Any]) -> dict[str, float | int | str]:
+    """Coerce calculation inputs to float|int|str; never leave required values as None.
+
+    Call sites historically stuffed Optional values (e.g. bmep_source) into the inputs
+    dict. Pydantic rejects None for ``dict[str, float | int | str]``. Unknowns are
+    recorded as the explicit sentinel ``\"unknown\"`` so validation reports can surface
+    missing provenance instead of crashing.
+    """
+    cleaned: dict[str, float | int | str] = {}
+    for key, value in inputs.items():
+        if value is None:
+            cleaned[key] = UNKNOWN_INPUT
+        elif isinstance(value, bool):
+            # bool is a subclass of int; keep as explicit 0/1 for schema stability
+            cleaned[key] = int(value)
+        elif isinstance(value, (float, int, str)):
+            cleaned[key] = value
+        else:
+            cleaned[key] = str(value)
+    return cleaned
+
+
 def _attach_provenance(calc_id: str, kwargs: dict) -> dict:
     """Merge equation provenance into PhysicsCalculation constructor kwargs."""
     prov = provenance_for_calc(calc_id)
@@ -81,8 +106,15 @@ def _attach_provenance(calc_id: str, kwargs: dict) -> dict:
 
 
 def make_physics_calculation(**kwargs) -> PhysicsCalculation:
-    """Construct a PhysicsCalculation with mandatory equation provenance."""
+    """Construct a PhysicsCalculation with mandatory equation provenance.
+
+    Sanitizes ``inputs`` so None never reaches the Pydantic model — unknown values
+    become the string sentinel ``\"unknown\"``.
+    """
     calc_id = str(kwargs["id"])
+    raw_inputs = kwargs.get("inputs")
+    if isinstance(raw_inputs, dict):
+        kwargs["inputs"] = _sanitize_calc_inputs(raw_inputs)
     return PhysicsCalculation(**_attach_provenance(calc_id, kwargs))
 
 
@@ -253,7 +285,7 @@ class PhysicsEngine:
                         "cylinder_count": cylinder_count or 0.0,
                         "cycle_model": "EngineCycleModel",
                         "bmep_source": (
-                            None
+                            UNKNOWN_INPUT
                             if cycle is None or cycle.bmep is None
                             else cycle.bmep.source
                         ),

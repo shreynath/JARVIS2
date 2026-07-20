@@ -1,4 +1,8 @@
-"""Independent formula validation against reported physics JSON (no PhysicsEngine import)."""
+"""Independent formula validation against reported physics JSON (no PhysicsEngine import).
+
+**externally_verified** — recomputes quantities from cited formulas and calc inputs.
+Registry: ``validation/integrity.py``. Tests: ``tests/validation/test_torque_formula.py`` etc.
+"""
 
 from __future__ import annotations
 

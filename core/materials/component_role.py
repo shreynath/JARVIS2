@@ -36,6 +36,23 @@ COMPONENT_ROLE_REGISTRY: dict[str, ComponentRole] = {
     "oil_pickup_tube": ComponentRole.FLUID_COMPONENT,
     "water_pump": ComponentRole.FLUID_COMPONENT,
     "oil_pump": ComponentRole.FLUID_COMPONENT,
+    # Bridge / civil structural members
+    "top_chord": ComponentRole.STRUCTURAL_LOAD_PATH,
+    "bottom_chord": ComponentRole.STRUCTURAL_LOAD_PATH,
+    "web_diagonals": ComponentRole.STRUCTURAL_LOAD_PATH,
+    "verticals": ComponentRole.STRUCTURAL_LOAD_PATH,
+    "stringers": ComponentRole.STRUCTURAL_LOAD_PATH,
+    # Bicycle frame tubes
+    "top_tube": ComponentRole.STRUCTURAL_LOAD_PATH,
+    "down_tube": ComponentRole.STRUCTURAL_LOAD_PATH,
+    "seat_tube": ComponentRole.STRUCTURAL_LOAD_PATH,
+    "seat_stays": ComponentRole.STRUCTURAL_LOAD_PATH,
+    "chain_stays": ComponentRole.STRUCTURAL_LOAD_PATH,
+    # Chair load path
+    "front_legs": ComponentRole.STRUCTURAL_LOAD_PATH,
+    "rear_legs": ComponentRole.STRUCTURAL_LOAD_PATH,
+    "stretchers": ComponentRole.STRUCTURAL_LOAD_PATH,
+    "seat_rails": ComponentRole.STRUCTURAL_LOAD_PATH,
 }
 
 

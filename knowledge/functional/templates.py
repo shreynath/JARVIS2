@@ -433,6 +433,12 @@ GEARBOX_ASSEMBLIES: list[dict] = [
 ]
 
 
+from knowledge.functional.general_domains import (
+    GENERAL_DOMAIN_KEYWORDS,
+    GENERAL_DOMAIN_TEMPLATES,
+)
+
+
 def _build_analysis(
     primary_function: str,
     functions: list[dict],
@@ -472,21 +478,45 @@ FUNCTIONAL_TEMPLATES: dict[str, FunctionalAnalysis] = {
         domains=["mechanical_design", "materials", "tribology"],
     ),
 }
+FUNCTIONAL_TEMPLATES.update(GENERAL_DOMAIN_TEMPLATES)
 
 
 def resolve_functional_template(object_type: str, raw_input: str) -> FunctionalAnalysis | None:
-    """Select functional template from object type and user input."""
-    lower = raw_input.lower()
+    """Select functional template from object type and user input.
 
-    if "gearbox" in lower or "transmission" in lower:
+    ICE is never the default for unrelated objects. Only explicit ICE / turbofan /
+    gearbox cues (or an exact template key) select those packs.
+    """
+    lower = raw_input.lower()
+    norm = (object_type or "").strip().lower().replace("-", "_").replace(" ", "_")
+
+    for keywords, key in GENERAL_DOMAIN_KEYWORDS:
+        if any(k in lower for k in keywords):
+            return FUNCTIONAL_TEMPLATES.get(key) or GENERAL_DOMAIN_TEMPLATES.get(key)
+
+    if "gearbox" in lower or "transmission" in lower or norm == "gearbox":
         return FUNCTIONAL_TEMPLATES["gearbox"]
-    if "aircraft" in lower or "turbofan" in lower or "jet engine" in lower or "commercial" in lower:
+    if any(p in lower for p in ("turbofan", "jet engine", "turbojet")) or norm == "turbofan_engine":
         return FUNCTIONAL_TEMPLATES["turbofan_engine"]
 
-    if object_type in FUNCTIONAL_TEMPLATES:
-        return FUNCTIONAL_TEMPLATES[object_type]
+    if norm in FUNCTIONAL_TEMPLATES:
+        return FUNCTIONAL_TEMPLATES[norm]
 
-    if "engine" in object_type or "engine" in lower:
+    # ICE only when clearly requested — not because the word "engine" appeared in a
+    # longer phrase about something else, and never as a universal default.
+    ice_cues = (
+        "internal combustion",
+        "combustion engine",
+        "v8",
+        "v-8",
+        "v12",
+        "v-12",
+        "ferrari",
+        "pagani",
+    )
+    if norm in {"internal_combustion_engine", "reciprocating_engine", "v8_engine", "v12_engine", "engine"}:
+        return FUNCTIONAL_TEMPLATES["internal_combustion_engine"]
+    if any(c in lower for c in ice_cues) and "jet" not in lower and "turbofan" not in lower:
         return FUNCTIONAL_TEMPLATES["internal_combustion_engine"]
 
     return None

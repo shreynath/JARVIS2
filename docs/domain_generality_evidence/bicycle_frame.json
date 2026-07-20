@@ -1,0 +1,316 @@
+{
+  "prompt": "design a bicycle frame",
+  "expected_family": "bicycle_frame",
+  "intent": {
+    "object_type": "bicycle_frame",
+    "design_goal": "design a bicycle frame",
+    "reference_objects": [],
+    "constraints": [],
+    "unknowns": [
+      "desired bike type (road, mountain, cruiser, etc.)",
+      "desired weight target",
+      "material selection (e.g., aluminum, carbon, steel)",
+      "budget constraints",
+      "user weight, height, and leg length (rear triangle sizing)",
+      "performance requirements (e.g., stiffness-to-weight ratio, durability)",
+      "manufacturing process constraints (e.g., welding, composite layup)"
+    ],
+    "required_domains": [
+      "mechanical_design",
+      "structural_analysis",
+      "materials"
+    ],
+    "raw_input": "design a bicycle frame"
+  },
+  "requirement_spec": {
+    "status": "complete",
+    "object_type": "bicycle_frame",
+    "design_goal": "design a bicycle frame",
+    "requirements": [
+      {
+        "id": "req_object_type",
+        "description": "Design object type resolved as bicycle_frame",
+        "metric": "object_type",
+        "target_value": "bicycle_frame",
+        "unit": null,
+        "priority": "critical",
+        "source": "intent_parser",
+        "originating_text": "design a bicycle frame",
+        "affected_assemblies": [
+          "root"
+        ],
+        "affected_components": [],
+        "downstream_design_consequences": [
+          "Selects functional decomposition template",
+          "Defines required engineering decision set",
+          "Initializes constraint graph even when numeric targets are absent"
+        ],
+        "derived_from": [],
+        "satisfies_decisions": [
+          "object_type"
+        ]
+      }
+    ],
+    "required_decisions": [],
+    "resolved_parameters": {},
+    "reference_profile": null,
+    "completeness_rationale": "All required engineering decisions resolved from prompt.",
+    "unrecognized_terms": [],
+    "conflicts": [],
+    "implausible_parameters": []
+  },
+  "functional_analysis": {
+    "primary_function": "DesignBicycleFrame",
+    "functions": [
+      {
+        "id": "f1",
+        "name": "DefineDesignRequirements",
+        "description": "Captures performance, safety, cost, weight, and durability criteria for the bicycle frame.",
+        "requires": [],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "f2",
+        "name": "DevelopGeometry",
+        "description": "Creates the initial geometry of the bicycle frame, specifying tube types, angles, and joint locations.",
+        "requires": [
+          "f1"
+        ],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "f3",
+        "name": "PerformStructuralAnalysis",
+        "description": "Carries out finite element analysis on the geometry to evaluate stress and deformation under typical loads.",
+        "requires": [
+          "f2"
+        ],
+        "domain": "structural_analysis"
+      },
+      {
+        "id": "f4",
+        "name": "EvaluateStructuralPerformance",
+        "description": "Interprets analysis results to determine if structural criteria are met.",
+        "requires": [
+          "f3"
+        ],
+        "domain": "structural_analysis"
+      },
+      {
+        "id": "f5",
+        "name": "OptimizeDesign",
+        "description": "Adjusts geometry or joint design to improve weight or strength based on performance evaluation.",
+        "requires": [
+          "f4",
+          "f2"
+        ],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "f6",
+        "name": "SelectMaterials",
+        "description": "Chooses appropriate materials for tubes and joints considering properties, cost, and manufacturability.",
+        "requires": [
+          "f5"
+        ],
+        "domain": "materials"
+      },
+      {
+        "id": "f7",
+        "name": "DocumentDesign",
+        "description": "Creates design drawings, specifications, and documentation for production.",
+        "requires": [
+          "f6"
+        ],
+        "domain": "mechanical_design"
+      }
+    ],
+    "flows": [
+      {
+        "id": "flow1",
+        "flow_type": "information",
+        "source_function_id": "f1",
+        "target_function_id": "f2",
+        "description": "Requirements data transmitted to geometry development."
+      },
+      {
+        "id": "flow2",
+        "flow_type": "information",
+        "source_function_id": "f2",
+        "target_function_id": "f3",
+        "description": "Geometry model provided to structural analysis."
+      },
+      {
+        "id": "flow3",
+        "flow_type": "information",
+        "source_function_id": "f3",
+        "target_function_id": "f4",
+        "description": "Analysis results forwarded for evaluation."
+      },
+      {
+        "id": "flow4",
+        "flow_type": "information",
+        "source_function_id": "f4",
+        "target_function_id": "f5",
+        "description": "Performance insights passed to optimization."
+      },
+      {
+        "id": "flow5",
+        "flow_type": "information",
+        "source_function_id": "f5",
+        "target_function_id": "f6",
+        "description": "Optimized geometry supplied to material selection."
+      },
+      {
+        "id": "flow6",
+        "flow_type": "information",
+        "source_function_id": "f6",
+        "target_function_id": "f7",
+        "description": "Material decisions provided to documentation."
+      }
+    ],
+    "required_assemblies": [
+      {
+        "id": "a1",
+        "name": "RequirementsAssembly",
+        "function": "DefineDesignRequirements",
+        "purpose": "Capture and validate design specifications for the bicycle frame.",
+        "serves_functions": [
+          "f1"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "a2",
+        "name": "GeometryAssembly",
+        "function": "DevelopGeometry",
+        "purpose": "Generate the initial frame geometry.",
+        "serves_functions": [
+          "f2"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "a3",
+        "name": "AnalysisAssembly",
+        "function": "PerformStructuralAnalysis",
+        "purpose": "Evaluate structural integrity under load.",
+        "serves_functions": [
+          "f3",
+          "f4"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "a4",
+        "name": "OptimizationAssembly",
+        "function": "OptimizeDesign",
+        "purpose": "Refine geometry for performance and weight.",
+        "serves_functions": [
+          "f5"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "a5",
+        "name": "MaterialAssembly",
+        "function": "SelectMaterials",
+        "purpose": "Determine suitable materials for the frame components.",
+        "serves_functions": [
+          "f6"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "a6",
+        "name": "DocumentationAssembly",
+        "function": "DocumentDesign",
+        "purpose": "Create production drawings and specifications.",
+        "serves_functions": [
+          "f7"
+        ],
+        "parent_assembly_id": "root"
+      }
+    ],
+    "required_domains": [
+      "mechanical_design",
+      "structural_analysis",
+      "materials"
+    ]
+  },
+  "component_ids": [
+    "user_data_gathering_module",
+    "performance_specification_sheet",
+    "cost_target_form",
+    "material_selection_criteria",
+    "manufacturing_constraints_document",
+    "regulatory_compliance_checklist",
+    "tube_layout_spec",
+    "joint_location_spec",
+    "parametric_cad_modeling",
+    "rear_triangle_sizing",
+    "front_triangle_sizing",
+    "model_importer",
+    "mesh_generator",
+    "load_case_definer",
+    "solver_engine",
+    "postprocessor",
+    "visualizer",
+    "compliance_checker",
+    "angle_lock_bracket",
+    "length_adjuster_pivot",
+    "joint_forming_mold",
+    "geometry_adapter_plate",
+    "tubular_stabilizer",
+    "frame_aluminum_tube",
+    "frame_carbon_fiber_tube",
+    "frame_steel_tube",
+    "hybrid_aluminum_steel_tube",
+    "doc_drawing_generation",
+    "doc_component_specification",
+    "doc_fabrication_instructions",
+    "doc_bill_of_materials",
+    "doc_quality_control_plan",
+    "doc_regulatory_compliance"
+  ],
+  "component_names": [
+    "User Data Gathering Module",
+    "Performance Specification Sheet",
+    "Cost Target Form",
+    "Material Selection Criteria",
+    "Manufacturing Constraints Document",
+    "Regulatory Compliance Checklist",
+    "TubeLayoutSpecification",
+    "JointLocationAndTypeSpecification",
+    "ParametricCADModeling",
+    "RearTriangleSizing",
+    "FrontTriangleSizing",
+    "Frame Geometry Importer",
+    "Mesh Generator Tool",
+    "Load Case Definition Module",
+    "FEM Solver Engine",
+    "Result Post-Processor",
+    "Stress Distribution Visualizer",
+    "Structural Compliance Checker",
+    "Angle Lock Bracket",
+    "Length Adjuster Pivot",
+    "Joint Forming Mold",
+    "Geometry Adapter Plate",
+    "Tubular Stiffener",
+    "Aluminum 6061-T6 Bicycle Frame Tube",
+    "Carbon Fiber (CF\u2011K) Bicycle Frame Tube",
+    "Steel 4130 Forged Bicycle Frame Tube",
+    "Hybrid Aluminum\u2011Steel Bicycle Frame Tube",
+    "Drawing Generation",
+    "Component Specification",
+    "Fabrication Instructions",
+    "Bill of Materials",
+    "Quality Control Documentation",
+    "Regulatory Compliance Documentation"
+  ],
+  "physics_warnings": [
+    "No physics module registered for object_type='bicycle_frame'; ICE PhysicsEngine was not invoked."
+  ],
+  "provider_used": "ollama:gpt-oss:20b",
+  "degraded": false
+}

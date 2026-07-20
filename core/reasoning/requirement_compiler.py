@@ -14,6 +14,7 @@ from core.ir.requirement_spec import (
     RequirementSpecification,
     SpecificationStatus,
 )
+from core.reasoning.domain_dispatch import is_bridge_object_type, is_ice_object_type
 from knowledge.requirements.templates import (
     ICE_REQUIRED_DECISIONS,
     REFERENCE_PROFILES,
@@ -51,13 +52,23 @@ class RequirementCompiler:
         text = intent.raw_input.lower()
         profile_id = match_reference_profile(text)
 
-        if profile_id:
+        if profile_id and is_ice_object_type(intent.object_type):
             return self._compile_from_profile(intent, profile_id)
 
-        extracted = self._extract_explicit_parameters(text)
-        conflicts = self._detect_conflicts(text, extracted)
-        unrecognized = self._detect_unrecognized_terms(text)
-        implausible = self._detect_implausible_parameters(extracted)
+        # ICE parameter extraction only for ICE object types — never invent RPM/HP
+        # decisions for chairs, bridges, etc.
+        if is_ice_object_type(intent.object_type):
+            extracted = self._extract_explicit_parameters(text)
+            conflicts = self._detect_conflicts(text, extracted)
+            unrecognized = self._detect_unrecognized_terms(text)
+            implausible = self._detect_implausible_parameters(extracted)
+        else:
+            extracted = self._extract_domain_parameters(text, intent.object_type or "")
+            conflicts = []
+            unrecognized = self._detect_unrecognized_terms(text)
+            implausible = []
+            # Reference profiles (Ferrari/Pagani) must not hijack non-ICE intents.
+            profile_id = None
 
         decisions = self._build_decisions(intent, extracted, conflicts, unrecognized)
         requirements = self._compile_from_intent_constraints(intent, extracted)
@@ -240,6 +251,21 @@ class RequirementCompiler:
 
         return params
 
+    def _extract_domain_parameters(self, text: str, object_type: str) -> dict[str, str | float | int]:
+        """Non-ICE explicit parameters — span, geometry bands, etc."""
+        params: dict[str, str | float | int] = {}
+        if is_bridge_object_type(object_type):
+            span_match = re.search(
+                r"spanning\s+(\d+(?:\.\d+)?)\s*m(?:eter)?s?\b", text, flags=re.IGNORECASE
+            )
+            if not span_match:
+                span_match = re.search(
+                    r"(\d+(?:\.\d+)?)\s*m(?:eter)?s?\s+span\b", text, flags=re.IGNORECASE
+                )
+            if span_match:
+                params["span_m"] = float(span_match.group(1))
+        return params
+
     def _detect_unrecognized_terms(self, text: str) -> list[dict[str, str]]:
         unrecognized: list[dict[str, str]] = []
         for term in self._UNKNOWN_MATERIAL_TERMS:
@@ -375,7 +401,11 @@ class RequirementCompiler:
         conflicts: list[dict[str, str]] | None = None,
         unrecognized: list[dict[str, str]] | None = None,
     ) -> list[RequiredDecision]:
-        decision_defs = self._OBJECT_DECISION_SETS.get(intent.object_type, ICE_REQUIRED_DECISIONS)
+        # Unknown object types get NO ICE decision pack. ICE decisions apply only
+        # to registered ICE types — never as a silent default (Phase B).
+        decision_defs = self._OBJECT_DECISION_SETS.get(intent.object_type, [])
+        if not decision_defs and is_ice_object_type(intent.object_type):
+            decision_defs = ICE_REQUIRED_DECISIONS
         decisions = [RequiredDecision(**d) for d in decision_defs]
 
         param_to_decision = {

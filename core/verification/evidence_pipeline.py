@@ -1,4 +1,9 @@
-"""Raw evidence → validated case transformation (no maturity side effects)."""
+"""Raw evidence → validated case transformation (no maturity side effects).
+
+``EvidenceValidator`` is **externally_verified** — enforces provenance against
+raw evidence records, not pipeline-generated design graphs.
+Adversarial tests: ``tests/validator_adversarial/test_evidence_validator.py``.
+"""
 
 from __future__ import annotations
 
@@ -13,6 +18,7 @@ from core.verification.datasets.validation_case import (
 from core.verification.evidence_quality import is_measurement_grade, quality_score
 from core.verification.evidence_source import SourceType
 from core.verification.raw_evidence import RawEvidenceRecord
+from validation.integrity import VerificationKind, registry_entry
 
 
 class EvidenceValidationError(ValueError):
@@ -21,9 +27,15 @@ class EvidenceValidationError(ValueError):
 
 @dataclass
 class EvidenceValidator:
-    """Enforces provenance / unit / uncertainty requirements."""
+    """Enforces provenance / unit / uncertainty requirements (externally_verified)."""
 
+    VALIDATOR_ID = "EvidenceValidator"
+    VERIFICATION_KIND = VerificationKind.EXTERNALLY_VERIFIED
     min_quality_for_validation: float = 0.5
+
+    @classmethod
+    def verification_metadata(cls):
+        return registry_entry(cls.VALIDATOR_ID)
 
     def validate_raw(self, record: RawEvidenceRecord) -> dict[str, Any]:
         """Return checklist; raises on hard reject."""

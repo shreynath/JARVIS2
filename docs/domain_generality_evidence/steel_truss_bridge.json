@@ -1,0 +1,234 @@
+{
+  "prompt": "design a steel truss bridge spanning 40 meters",
+  "expected_family": "steel_truss_bridge",
+  "intent": {
+    "object_type": "steel_truss_bridge",
+    "design_goal": "Design a steel truss bridge that spans 40 meters.",
+    "reference_objects": [],
+    "constraints": [
+      {
+        "type": "span_length",
+        "description": "Total bridge span must be exactly 40 meters",
+        "priority": "critical",
+        "value": null
+      },
+      {
+        "type": "material",
+        "description": "Bridge components must be constructed from steel",
+        "priority": "critical",
+        "value": null
+      }
+    ],
+    "unknowns": [
+      "anticipated load types and magnitudes (vehicle, pedestrian, dynamic loads)",
+      "deck width and configuration",
+      "environmental conditions (wind, seismic, temperature variations)",
+      "site topography and bearing conditions",
+      "required clearance under the bridge",
+      "budget and cost constraints",
+      "fabrication and construction tolerances",
+      "maintenance and inspection requirements"
+    ],
+    "required_domains": [
+      "structural_analysis",
+      "materials",
+      "civil_engineering",
+      "mechanical_design"
+    ],
+    "raw_input": "design a steel truss bridge spanning 40 meters"
+  },
+  "requirement_spec": {
+    "status": "complete",
+    "object_type": "steel_truss_bridge",
+    "design_goal": "Design a steel truss bridge that spans 40 meters.",
+    "requirements": [
+      {
+        "id": "req_object_type",
+        "description": "Design object type resolved as steel_truss_bridge",
+        "metric": "object_type",
+        "target_value": "steel_truss_bridge",
+        "unit": null,
+        "priority": "critical",
+        "source": "intent_parser",
+        "originating_text": "design a steel truss bridge spanning 40 meters",
+        "affected_assemblies": [
+          "root"
+        ],
+        "affected_components": [],
+        "downstream_design_consequences": [
+          "Selects functional decomposition template",
+          "Defines required engineering decision set",
+          "Initializes constraint graph even when numeric targets are absent"
+        ],
+        "derived_from": [],
+        "satisfies_decisions": [
+          "object_type"
+        ]
+      }
+    ],
+    "required_decisions": [],
+    "resolved_parameters": {},
+    "reference_profile": null,
+    "completeness_rationale": "All required engineering decisions resolved from prompt.",
+    "unrecognized_terms": [],
+    "conflicts": [],
+    "implausible_parameters": []
+  },
+  "functional_analysis": {
+    "primary_function": "Regulate environmental conditions within an indoor greenhouse.",
+    "functions": [
+      {
+        "id": "F1",
+        "name": "Temperature Sensor",
+        "description": "Measures ambient temperature within the greenhouse.",
+        "requires": [],
+        "domain": "sensing"
+      },
+      {
+        "id": "F2",
+        "name": "Humidity Sensor",
+        "description": "Measures ambient humidity within the greenhouse.",
+        "requires": [],
+        "domain": "sensing"
+      },
+      {
+        "id": "F3",
+        "name": "Climate Control Algorithm",
+        "description": "Processes temperature and humidity data to generate actuation commands.",
+        "requires": [
+          "F1",
+          "F2"
+        ],
+        "domain": "control"
+      },
+      {
+        "id": "F4",
+        "name": "Heater Actuator",
+        "description": "Activates the heating system to raise temperature.",
+        "requires": [
+          "F3"
+        ],
+        "domain": "actuation"
+      },
+      {
+        "id": "F5",
+        "name": "Misting Actuator",
+        "description": "Activates the misting system to increase humidity.",
+        "requires": [
+          "F3"
+        ],
+        "domain": "actuation"
+      }
+    ],
+    "flows": [
+      {
+        "id": "I1",
+        "flow_type": "information",
+        "source_function_id": "F1",
+        "target_function_id": "F3",
+        "description": "Temperature sensor data sent to climate control algorithm."
+      },
+      {
+        "id": "I2",
+        "flow_type": "information",
+        "source_function_id": "F2",
+        "target_function_id": "F3",
+        "description": "Humidity sensor data sent to climate control algorithm."
+      },
+      {
+        "id": "I3",
+        "flow_type": "information",
+        "source_function_id": "F3",
+        "target_function_id": "F4",
+        "description": "Heater activation command sent to heater actuator."
+      },
+      {
+        "id": "I4",
+        "flow_type": "information",
+        "source_function_id": "F3",
+        "target_function_id": "F5",
+        "description": "Misting activation command sent to misting actuator."
+      }
+    ],
+    "required_assemblies": [
+      {
+        "id": "A1",
+        "name": "Environmental Sensing Assembly",
+        "function": "Atmospheric condition sensing",
+        "purpose": "Collects temperature and humidity data",
+        "serves_functions": [
+          "F1",
+          "F2"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "A2",
+        "name": "Climate Regulation Assembly",
+        "function": "Control Decision Making",
+        "purpose": "Processes sensor data to generate actuation commands",
+        "serves_functions": [
+          "F3"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "A3",
+        "name": "Actuation Assembly",
+        "function": "Environmental actuation",
+        "purpose": "Applies heating and misting to maintain conditions",
+        "serves_functions": [
+          "F4",
+          "F5"
+        ],
+        "parent_assembly_id": "root"
+      }
+    ],
+    "required_domains": [
+      "sensing",
+      "control",
+      "actuation"
+    ]
+  },
+  "component_ids": [
+    "temp_sensor_module",
+    "humidity_sensor_module",
+    "temperature_control_logic",
+    "humidity_control_logic",
+    "data_acquisition_interface",
+    "actuation_command_generator",
+    "safety_monitor",
+    "communication_interface",
+    "data_logging_module",
+    "pid_controller",
+    "component_heater_element",
+    "component_heater_control_switch",
+    "component_heater_power_supply",
+    "component_misting_nozzle",
+    "component_misting_pump",
+    "component_water_valve"
+  ],
+  "component_names": [
+    "Temperature Sensor Module",
+    "Humidity Sensor Module",
+    "Temperature Control Logic",
+    "Humidity Control Logic",
+    "Sensor Data Acquisition Interface",
+    "Actuation Command Generator",
+    "Safety Monitoring Module",
+    "System Communication Interface",
+    "Data Logging Module",
+    "PID Control Subroutine",
+    "Resistive Heating Element",
+    "Heater Control Switch",
+    "Heater Power Supply Module",
+    "Misting Nozzle",
+    "Misting Pump",
+    "Hydraulic Water Valve"
+  ],
+  "physics_warnings": [
+    "No physics module registered for object_type='steel_truss_bridge'; ICE PhysicsEngine was not invoked."
+  ],
+  "provider_used": "ollama:gpt-oss:20b",
+  "degraded": false
+}

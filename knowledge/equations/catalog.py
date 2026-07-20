@@ -150,6 +150,42 @@ EQUATION_CATALOG: dict[str, dict[str, Any]] = {
         "unit_check": "empirical °C mapping — not dimensionally derived from first principles",
         "confidence": "low",
     },
+    "eq_bridge_deck_moment": {
+        "equation_id": "eq_bridge_deck_moment",
+        "name": "Simply-supported beam maximum moment",
+        "equation": "M_max = w * L^2 / 8",
+        "equation_source": "Elementary beam theory — simply supported UDL",
+        "engineering_reference": {
+            "citation": "Hibbeler, Structural Analysis — beam internal moment diagram",
+            "text": "Structural Analysis",
+            "author": "R. C. Hibbeler",
+            "edition": "standard structural analysis text",
+            "chapter": "Internal forces in beams",
+            "page": None,
+            "note": "Live load w is ASSUMED when not specified in prompt.",
+        },
+        "validation_status": "FORMULA_VERIFIED_PARAMETERS_ASSUMED",
+        "unit_check": "(N/m) * m² → N·m",
+        "confidence": "medium",
+    },
+    "eq_truss_member_stress": {
+        "equation_id": "eq_truss_member_stress",
+        "name": "Truss member axial stress",
+        "equation": "sigma = F_member / A_member; F_member ≈ M_max / truss_depth",
+        "equation_source": "Truss analogy from equivalent beam moment",
+        "engineering_reference": {
+            "citation": "Hibbeler, Structural Analysis — truss internal forces",
+            "text": "Structural Analysis",
+            "author": "R. C. Hibbeler",
+            "edition": "standard structural analysis text",
+            "chapter": "Truss analysis",
+            "page": None,
+            "note": "Member area and live load may be ASSUMED bands.",
+        },
+        "validation_status": "FORMULA_VERIFIED_PARAMETERS_ASSUMED",
+        "unit_check": "N / m² → Pa",
+        "confidence": "medium",
+    },
     "eq_oil_flow": {
         "equation_id": "eq_oil_flow",
         "name": "Oil flow",
@@ -172,6 +208,8 @@ CALC_TO_EQUATION: dict[str, str] = {
     "calc_rod_stress_requirement": "eq_rod_stress",
     "calc_heat_rejection": "eq_heat_rejection",
     "calc_combustion_side_temperature": "eq_combustion_temp_empirical",
+    "calc_bridge_deck_moment": "eq_bridge_deck_moment",
+    "calc_truss_member_stress": "eq_truss_member_stress",
 }
 
 

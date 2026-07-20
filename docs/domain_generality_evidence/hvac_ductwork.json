@@ -1,0 +1,328 @@
+{
+  "prompt": "design a residential HVAC ductwork system",
+  "expected_family": "hvac_ductwork",
+  "intent": {
+    "object_type": "hvac_ductwork",
+    "design_goal": "Design a residential HVAC ductwork system",
+    "reference_objects": [],
+    "constraints": [],
+    "unknowns": [
+      "building layout and dimensions",
+      "total conditioned space volume",
+      "number and location of supply and return vents",
+      "desired airflow rates for each zone",
+      "HVAC unit type and capacity",
+      "acceptable static pressure loss",
+      "noise tolerance levels",
+      "budget constraints",
+      "local building codes and standards"
+    ],
+    "required_domains": [
+      "mechanical_design",
+      "fluid_dynamics",
+      "thermodynamics",
+      "acoustics",
+      "building_codes",
+      "materials",
+      "thermal"
+    ],
+    "raw_input": "design a residential HVAC ductwork system"
+  },
+  "requirement_spec": {
+    "status": "complete",
+    "object_type": "hvac_ductwork",
+    "design_goal": "Design a residential HVAC ductwork system",
+    "requirements": [
+      {
+        "id": "req_object_type",
+        "description": "Design object type resolved as hvac_ductwork",
+        "metric": "object_type",
+        "target_value": "hvac_ductwork",
+        "unit": null,
+        "priority": "critical",
+        "source": "intent_parser",
+        "originating_text": "design a residential HVAC ductwork system",
+        "affected_assemblies": [
+          "root"
+        ],
+        "affected_components": [],
+        "downstream_design_consequences": [
+          "Selects functional decomposition template",
+          "Defines required engineering decision set",
+          "Initializes constraint graph even when numeric targets are absent"
+        ],
+        "derived_from": [],
+        "satisfies_decisions": [
+          "object_type"
+        ]
+      }
+    ],
+    "required_decisions": [],
+    "resolved_parameters": {},
+    "reference_profile": null,
+    "completeness_rationale": "All required engineering decisions resolved from prompt.",
+    "unrecognized_terms": [],
+    "conflicts": [],
+    "implausible_parameters": []
+  },
+  "functional_analysis": {
+    "primary_function": "Design and implement a residential HVAC ductwork system that delivers conditioned air efficiently and safely while complying with building codes, minimizing energy losses, and ensuring occupant comfort, noise control, and air quality.",
+    "functions": [
+      {
+        "id": "f1",
+        "name": "Duct Network Design",
+        "description": "Create the layout, sizing, and routing of duct segments to optimally deliver conditioned air across residential zones.",
+        "requires": [],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "f2",
+        "name": "Airflow Path Planning",
+        "description": "Determine supply and return airflow paths and velocities within the duct network to ensure even distribution and meet pressure constraints.",
+        "requires": [],
+        "domain": "fluid_dynamics"
+      },
+      {
+        "id": "f3",
+        "name": "Pressure Equalization",
+        "description": "Balance static and dynamic pressures across all duct junctions to reduce pressure loss and avoid draughts.",
+        "requires": [
+          "f2"
+        ],
+        "domain": "fluid_dynamics"
+      },
+      {
+        "id": "f4",
+        "name": "Thermal Insulation Management",
+        "description": "Select and integrate insulation materials and sacrificial layers to minimize heat loss/gain in ducts and maintain system efficiency.",
+        "requires": [
+          "f1"
+        ],
+        "domain": "thermodynamics"
+      },
+      {
+        "id": "f5",
+        "name": "Acoustic Damping",
+        "description": "Design acoustic treatments such as sound traps, baffles, and duct liners to reduce noise transmitted to occupied zones.",
+        "requires": [],
+        "domain": "acoustics"
+      },
+      {
+        "id": "f6",
+        "name": "Material Selection and Testing",
+        "description": "Identify and qualify duct and insulation materials based on thermal, corrosion, and structural criteria.",
+        "requires": [],
+        "domain": "materials"
+      },
+      {
+        "id": "f7",
+        "name": "Airtight Jointing and Sealing",
+        "description": "Ensure all duct joints, connections, and penetrations are airtight to prevent airflow leakage, noise transmission, and contaminant escape.",
+        "requires": [],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "f8",
+        "name": "Control Integration",
+        "description": "Provide control signals and sensor interfaces for pressure, temperature, and airflow monitoring and adjustment.",
+        "requires": [],
+        "domain": "control_system"
+      },
+      {
+        "id": "f9",
+        "name": "Building Code Compliance",
+        "description": "Assess the duct design against applicable building, fire, and HVAC codes to guarantee safety and regulatory approval.",
+        "requires": [],
+        "domain": "building_codes"
+      },
+      {
+        "id": "f10",
+        "name": "Filter and Air Quality Provision",
+        "description": "Specify filter placements and types to maintain indoor air quality targets while keeping pressure loss acceptable.",
+        "requires": [],
+        "domain": "thermal"
+      }
+    ],
+    "flows": [
+      {
+        "id": "g1",
+        "flow_type": "information",
+        "source_function_id": "f6",
+        "target_function_id": "f1",
+        "description": "Material specifications and performance data feed into duct network size and material selection."
+      },
+      {
+        "id": "g2",
+        "flow_type": "information",
+        "source_function_id": "f9",
+        "target_function_id": "f1",
+        "description": "Building code requirements constrain duct sizes, materials, and placement."
+      },
+      {
+        "id": "g3",
+        "flow_type": "information",
+        "source_function_id": "f5",
+        "target_function_id": "f2",
+        "description": "Acoustic treatment parameters influence airflow path design to avoid resonant frequencies."
+      },
+      {
+        "id": "g4",
+        "flow_type": "information",
+        "source_function_id": "f3",
+        "target_function_id": "f2",
+        "description": "Pressure balance constraints inform velocity and sizing decisions in airflow path planning."
+      },
+      {
+        "id": "g5",
+        "flow_type": "information",
+        "source_function_id": "f8",
+        "target_function_id": "f3",
+        "description": "Real\u2011time pressure sensor data enable active pressure adjustment."
+      },
+      {
+        "id": "g6",
+        "flow_type": "information",
+        "source_function_id": "f10",
+        "target_function_id": "f2",
+        "description": "Filter configuration data (location, type, pressure drop) influence airflow path and pressure loss calculations."
+      }
+    ],
+    "required_assemblies": [
+      {
+        "id": "a1",
+        "name": "Primary Duct Network",
+        "function": "Airflow Distribution System",
+        "purpose": "Route conditioned air between supply and return zones while meeting pressure and thermal specifications.",
+        "serves_functions": [
+          "f1",
+          "f2",
+          "f3",
+          "f4",
+          "f5"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "a2",
+        "name": "Joint & Sealing Module",
+        "function": "Airtight Connection System",
+        "purpose": "Provide sealed junctions between ducts to prevent leakage and maintain noise isolation.",
+        "serves_functions": [
+          "f7"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "a3",
+        "name": "Insulation & Material Module",
+        "function": "Thermal Protection System",
+        "purpose": "Insulate ducts and embed selected material properties for durability and thermal performance.",
+        "serves_functions": [
+          "f6",
+          "f4"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "a4",
+        "name": "Control & Compliance Module",
+        "function": "Control and Code Compliance System",
+        "purpose": "Integrate real\u2011time control signals and enforce building code constraints across the duct network.",
+        "serves_functions": [
+          "f8",
+          "f9"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "a5",
+        "name": "Filter Module",
+        "function": "Air Quality Module",
+        "purpose": "Provide filtration to maintain indoor air quality while keeping pressure loss within limits.",
+        "serves_functions": [
+          "f10"
+        ],
+        "parent_assembly_id": "root"
+      }
+    ],
+    "required_domains": [
+      "mechanical_design",
+      "fluid_dynamics",
+      "thermodynamics",
+      "acoustics",
+      "building_codes",
+      "materials",
+      "thermal",
+      "control_system"
+    ]
+  },
+  "component_ids": [
+    "c1",
+    "c2",
+    "c3",
+    "c4",
+    "c5",
+    "c6",
+    "dc_flange_insertion",
+    "dc_duct_coupler_bolt",
+    "dc_gasket_strips",
+    "dc_pipe_sealant",
+    "dc_heat_shrink",
+    "dc_end_seal_panel",
+    "duct_sheet_aluminum_356_t6",
+    "mineral_wool_insulation",
+    "reflective_insulation_duct",
+    "stainless_steel_304_duct_cladding",
+    "spray_foam_insulation",
+    "duct_insulation_adhesive",
+    "pressure_sensor_unit",
+    "temperature_sensor_unit",
+    "flow_rate_sensor_unit",
+    "control_processor_block",
+    "safety_interlock_unit",
+    "code_compliance_validator",
+    "filter_housing",
+    "filter_cartridge",
+    "filter_mounting_bracket",
+    "filter_seal_ring",
+    "filter_pressure_indicator",
+    "filter_cleaning_alarm"
+  ],
+  "component_names": [
+    "Supply_Duct_Mainline",
+    "Return_Duct_Mainline",
+    "Pressure_Balancing_Damper",
+    "Duct_Insulation_Sheet",
+    "Acoustic_Baffle_Section",
+    "Duct_Bend_Section",
+    "Forged Steel Duct Flange with 3/4\" Insertion",
+    "Forged Steel Duct Coupler with Integrated Insertion Bolt",
+    "Silicone Gasket Strip for Duct Junctions",
+    "PVC Pipe Sealant (SpecSeal\u2122 4.0)",
+    "2\u2011inch Heat\u2011Shrink Tubing with UV\u2011Stabilized Polyurethane Core",
+    "Acoustic End\u2011Closure Seal Panel with Steel Core",
+    "Aluminum Duct Sheet 356-T6",
+    "Mineral Wool Duct Insulation",
+    "Reflective Metalized Foil Insulation",
+    "Stainless Steel 304 Duct Cladding",
+    "Extruded Polystyrene (XPS) Spray Foam",
+    "High Temperature EPDM Adhesive Tape",
+    "Pressure Sensor Unit",
+    "Temperature Sensor Unit",
+    "Airflow Velocity Sensor Unit",
+    "Control Processor Block",
+    "Safety Interlock Unit",
+    "Code Compliance Validator",
+    "Filter Housing",
+    "Air Filter Cartridge",
+    "Filter Mounting Bracket",
+    "O\u2011Ring Seal",
+    "Pressure Drop Indicator",
+    "Cleaning Alarm Sensor"
+  ],
+  "physics_warnings": [
+    "No physics module registered for object_type='hvac_ductwork'; ICE PhysicsEngine was not invoked."
+  ],
+  "provider_used": "ollama:gpt-oss:20b",
+  "degraded": false
+}

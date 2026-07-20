@@ -1,19 +1,21 @@
 """Physics rules validation — material presence only.
 
-Hard-limit engineering constraints are evaluated exclusively via
-ConstraintEvaluation (see validation/constraint_evaluator.py). This module
-emits warnings for missing materials; suitability failures also flow through
-ConstraintEvaluator so hard_violations have a single aggregation path.
+**self_consistency_check** — warning-only for missing materials. Hard-limit
+engineering constraints are evaluated exclusively via ``ConstraintEvaluator``.
+Adversarial tests: ``tests/validator_adversarial/test_physics_rules_engine.py``.
 """
 
 from __future__ import annotations
 
 from core.ir.design_graph import EngineeringDesignGraph
+from validation.integrity import stamp_validator
 from validation.schema_validator import ValidationReport
 
 
 class PhysicsRulesEngine:
     """Check physics-based engineering rules that are not ConstraintEvaluations."""
+
+    VALIDATOR_ID = "PhysicsRulesEngine"
 
     def validate(self, graph: EngineeringDesignGraph) -> ValidationReport:
         report = ValidationReport()
@@ -27,4 +29,6 @@ class PhysicsRulesEngine:
                     node_id=comp.id,
                 )
 
+        # Warning-only — rejected=False unless paired with critical issues elsewhere.
+        stamp_validator(report, self.VALIDATOR_ID, rejected=False)
         return report

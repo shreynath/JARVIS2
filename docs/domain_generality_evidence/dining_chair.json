@@ -1,0 +1,345 @@
+{
+  "prompt": "design a chair",
+  "expected_family": "dining_chair",
+  "intent": {
+    "object_type": "dining_chair",
+    "design_goal": "Design an ergonomically comfortable dining chair for residential use.",
+    "reference_objects": [
+      "Ikea Markus"
+    ],
+    "constraints": [
+      {
+        "type": "material_type",
+        "description": "Primary material(s) for frame, seating, and upholstery.",
+        "priority": "high",
+        "value": null
+      },
+      {
+        "type": "load_capacity",
+        "description": "Maximum weight the chair can support safely.",
+        "priority": "critical",
+        "value": null
+      },
+      {
+        "type": "manufacturing_method",
+        "description": "Preferred production technique (e.g., injection molding, CNC machining).",
+        "priority": "low",
+        "value": null
+      },
+      {
+        "type": "aesthetic_style",
+        "description": "Desired design style (e.g., modern, vintage, ergonomic).",
+        "priority": "low",
+        "value": null
+      }
+    ],
+    "unknowns": [
+      "seat_height",
+      "seat_width",
+      "seat_depth",
+      "backrest_angle",
+      "material_type",
+      "load_capacity",
+      "aesthetic_style",
+      "manufacturing_method"
+    ],
+    "required_domains": [
+      "mechanical_design",
+      "materials",
+      "ergonomics",
+      "manufacturing",
+      "structural_analysis"
+    ],
+    "raw_input": "design a chair"
+  },
+  "requirement_spec": {
+    "status": "complete",
+    "object_type": "dining_chair",
+    "design_goal": "Design an ergonomically comfortable dining chair for residential use.",
+    "requirements": [
+      {
+        "id": "req_object_type",
+        "description": "Design object type resolved as dining_chair",
+        "metric": "object_type",
+        "target_value": "dining_chair",
+        "unit": null,
+        "priority": "critical",
+        "source": "intent_parser",
+        "originating_text": "design a chair",
+        "affected_assemblies": [
+          "root"
+        ],
+        "affected_components": [],
+        "downstream_design_consequences": [
+          "Selects functional decomposition template",
+          "Defines required engineering decision set",
+          "Initializes constraint graph even when numeric targets are absent"
+        ],
+        "derived_from": [],
+        "satisfies_decisions": [
+          "object_type"
+        ]
+      }
+    ],
+    "required_decisions": [],
+    "resolved_parameters": {},
+    "reference_profile": null,
+    "completeness_rationale": "All required engineering decisions resolved from prompt.",
+    "unrecognized_terms": [],
+    "conflicts": [],
+    "implausible_parameters": []
+  },
+  "functional_analysis": {
+    "primary_function": "Design an ergonomically comfortable and structurally safe dining chair for residential use.",
+    "functions": [
+      {
+        "id": "F1",
+        "name": "Provide Seating Support",
+        "description": "Ensure the chair can support occupant weight and distribute load across the seat and frame.",
+        "requires": [
+          "F1.1",
+          "F1.2"
+        ],
+        "domain": "structural_analysis"
+      },
+      {
+        "id": "F1.1",
+        "name": "Load Distribution Analysis",
+        "description": "Analyze how occupant load is transmitted through seat, backrest, and frame to legs.",
+        "requires": [],
+        "domain": "structural_analysis"
+      },
+      {
+        "id": "F1.2",
+        "name": "Frame Design",
+        "description": "Define the geometry and joint configuration of the frame to resist bending and torsion under load.",
+        "requires": [],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "F2",
+        "name": "Ensure Ergonomic Comfort",
+        "description": "Create seat, backrest, and cushioning geometry that meets human factors guidelines for comfort.",
+        "requires": [
+          "F2.1",
+          "F2.2",
+          "F2.3"
+        ],
+        "domain": "ergonomics"
+      },
+      {
+        "id": "F2.1",
+        "name": "Seat Geometry Determination",
+        "description": "Determine seat height, depth and contour to align with anthropometric data.",
+        "requires": [],
+        "domain": "ergonomics"
+      },
+      {
+        "id": "F2.2",
+        "name": "Cushioning Material Selection",
+        "description": "Select foam density, support, and comfort characteristics appropriate for residential use.",
+        "requires": [],
+        "domain": "materials"
+      },
+      {
+        "id": "F2.3",
+        "name": "Lumbar Support Design",
+        "description": "Develop the shape and embedment method for lumbar support to reduce lower\u2011back strain.",
+        "requires": [],
+        "domain": "ergonomics"
+      },
+      {
+        "id": "F3",
+        "name": "Material Selection",
+        "description": "Choose primary materials for frame, seat, and upholstery based on strength, comfort, and aesthetics.",
+        "requires": [],
+        "domain": "materials"
+      },
+      {
+        "id": "F4",
+        "name": "Aesthetic Design Compliance",
+        "description": "Ensure the chair meets the chosen visual style (e.g., modern ergonomic) and finish requirements.",
+        "requires": [],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "F5",
+        "name": "Manufacturing Method Definition",
+        "description": "Determine applicable production techniques (e.g., CNC machining, injection molding) for each component.",
+        "requires": [],
+        "domain": "manufacturing"
+      },
+      {
+        "id": "F6",
+        "name": "Assembly Integration",
+        "description": "Define sub\u2011assemblies and joining methods to construct the final chair product.",
+        "requires": [],
+        "domain": "mechanical_design"
+      }
+    ],
+    "flows": [
+      {
+        "id": "flow_material_F3_to_F1.2",
+        "flow_type": "material",
+        "source_function_id": "F3",
+        "target_function_id": "F1.2",
+        "description": "Primary frame materials flow from material selection to frame design."
+      },
+      {
+        "id": "flow_material_F3_to_F2.2",
+        "flow_type": "material",
+        "source_function_id": "F3",
+        "target_function_id": "F2.2",
+        "description": "Cushioning materials flow from material selection to cushioning design."
+      },
+      {
+        "id": "flow_information_F4_to_F6",
+        "flow_type": "information",
+        "source_function_id": "F4",
+        "target_function_id": "F6",
+        "description": "Aesthetic design specifications inform assembly location and finish."
+      },
+      {
+        "id": "flow_information_F5_to_F6",
+        "flow_type": "information",
+        "source_function_id": "F5",
+        "target_function_id": "F6",
+        "description": "Manufacturing method constraints inform joint selection and assembly methods."
+      },
+      {
+        "id": "flow_information_F1.1_and_F1.2_to_F6",
+        "flow_type": "information",
+        "source_function_id": "F1.1",
+        "target_function_id": "F6",
+        "description": "Load distribution data informs assembly strength and joint design."
+      }
+    ],
+    "required_assemblies": [
+      {
+        "id": "A1",
+        "name": "Frame Assembly",
+        "function": "Provide structural support and load transfer",
+        "purpose": "Create the main load\u2011bearing structure for the chair.",
+        "serves_functions": [
+          "F1.2"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "A2",
+        "name": "Seat Assembly",
+        "function": "Deliver seating surface with proper comfort",
+        "purpose": "Combine seat geometry, cushioning, and upholstery into a single functional unit.",
+        "serves_functions": [
+          "F2.1",
+          "F2.2"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "A3",
+        "name": "Backrest Assembly",
+        "function": "Provide back support",
+        "purpose": "Integrate backrest geometry and cushioning with lumbar support.",
+        "serves_functions": [
+          "F2.3"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "A4",
+        "name": "Lumbar Support Sub\u2011assembly",
+        "function": "Deliver targeted lower\u2011back support",
+        "purpose": "Insert lumbar element into backrest or seat cushion.",
+        "serves_functions": [
+          "F2.3"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "A5",
+        "name": "Leg Assembly",
+        "function": "Transfer load from seat to floor",
+        "purpose": "Provide stable, vertically oriented legs linked to the frame.",
+        "serves_functions": [
+          "F1.2"
+        ],
+        "parent_assembly_id": "root"
+      }
+    ],
+    "required_domains": [
+      "mechanical_design",
+      "materials",
+      "ergonomics",
+      "manufacturing",
+      "structural_analysis"
+    ]
+  },
+  "component_ids": [
+    "frame_box",
+    "front_panel",
+    "side_panel_left",
+    "side_panel_right",
+    "back_panel",
+    "cross_brace",
+    "leg_mounting_plate",
+    "seat_frame_structural",
+    "foam_cushion_core",
+    "seat_top_panel",
+    "upholstery_cover",
+    "backrest_frame_rail",
+    "lumbar_support_arch",
+    "lumbar_support_pad",
+    "backrest_cushion",
+    "backrest_upholstery_cover",
+    "backrest_mounting_bracket",
+    "backrest_fastener_set",
+    "lumbar_cushion_pad",
+    "lumbar_support_bracket",
+    "lumbar_retention_clip",
+    "lumbar_interface_layer",
+    "lumbar_fastener_set",
+    "lumbar_cushion_cutout",
+    "lumbar_dip_cutout",
+    "leg_extrusion",
+    "leg_mount_plate",
+    "knee_joint_bracket",
+    "anti_slip_floor_pad"
+  ],
+  "component_names": [
+    "Primary Frame Box",
+    "Front Frame Panel",
+    "Left Side Frame Panel",
+    "Right Side Frame Panel",
+    "Back Frame Panel",
+    "Lower Cross Brace",
+    "Leg Mounting Plate",
+    "Seat Structural Frame",
+    "Polyurethane Foam Cushion Core",
+    "Seat Surface Panel",
+    "Upholstery Fabric Cover",
+    "Backrest Frame Rail",
+    "Lumbar Support Arch",
+    "Lumbar Support Pad",
+    "Backrest Cushion",
+    "Backrest Upholstery Cover",
+    "Backrest Mounting Bracket",
+    "Backrest Fastener Set",
+    "Lumbar Cushion Pad",
+    "Lumbar Support Bracket",
+    "Lumbar Retention Clip",
+    "Lumbar Interface Layer",
+    "Lumbar Fastener Set",
+    "Lumbar Cushion Cutout",
+    "Lumbar Dip Cutout",
+    "Vertical Leg Extrusion",
+    "Leg Top Mounting Plate",
+    "Knee Joint Bracket",
+    "Anti\u2011Slip Floor Pad"
+  ],
+  "physics_warnings": [
+    "No physics module registered for object_type='dining_chair'; ICE PhysicsEngine was not invoked."
+  ],
+  "provider_used": "ollama:gpt-oss:20b",
+  "degraded": false
+}

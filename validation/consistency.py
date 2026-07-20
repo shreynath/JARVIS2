@@ -1,13 +1,20 @@
-"""Consistency validation — missing refs, orphans, invalid hierarchies."""
+"""Consistency validation — missing refs, orphans, invalid hierarchies.
+
+``ConsistencyChecker`` is **self_consistency_check** — graph topology only.
+Adversarial tests: ``tests/validator_adversarial/test_consistency_checker.py``.
+"""
 
 from __future__ import annotations
 
 from core.ir.design_graph import EngineeringDesignGraph
+from validation.integrity import stamp_validator
 from validation.schema_validator import ValidationReport
 
 
 class ConsistencyChecker:
     """Detect structural inconsistencies in the design graph."""
+
+    VALIDATOR_ID = "ConsistencyChecker"
 
     def validate(self, graph: EngineeringDesignGraph) -> ValidationReport:
         report = ValidationReport()
@@ -63,6 +70,7 @@ class ConsistencyChecker:
                 )
 
         self._check_cycles(graph, report)
+        stamp_validator(report, self.VALIDATOR_ID)
         return report
 
     @staticmethod

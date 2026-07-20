@@ -592,3 +592,157 @@ COMPONENT_TEMPLATES: dict[str, list[dict]] = {
 GENERIC_COMPONENT_NAMES = frozenset(
     {"sub component", "sub_component", "generic sub-component", "generic component"}
 )
+
+
+def _leaf(
+    id: str,
+    name: str,
+    function: str,
+    purpose: str,
+    serves: str,
+    material: str | None = None,
+    complexity: float = 0.8,
+) -> dict:
+    return {
+        "id": id,
+        "name": name,
+        "function": function,
+        "purpose": purpose,
+        "justification": f"Required by {serves} function",
+        "serves_function_id": serves,
+        "material": material,
+        "complexity_score": complexity,
+        "is_leaf": True,
+    }
+
+
+# --- Non-ICE domain component packs (knowledge extension; pipeline-agnostic) ---
+COMPONENT_TEMPLATES.update(
+    {
+        "seat_assembly": [
+            _leaf("seat_panel", "Seat Panel", "Primary seating surface", "Support user", "provide_seat", "Hardwood plywood"),
+            _leaf("seat_rails", "Seat Rails", "Seat frame rails", "Stiffen seat", "support_load", "Hardwood"),
+        ],
+        "backrest_assembly": [
+            _leaf("backrest_panel", "Backrest Panel", "Back support surface", "User comfort", "provide_backrest", "Hardwood"),
+            _leaf("back_posts", "Back Posts", "Vertical back supports", "Back structure", "provide_backrest", "Hardwood"),
+        ],
+        "leg_frame_assembly": [
+            _leaf("front_legs", "Front Legs", "Forward vertical supports", "Load to floor", "stabilize", "Hardwood"),
+            _leaf("rear_legs", "Rear Legs", "Rear vertical supports", "Load to floor", "stabilize", "Hardwood"),
+            _leaf("stretchers", "Stretchers", "Lateral bracing", "Resist racking", "stabilize", "Hardwood"),
+        ],
+        "main_triangle": [
+            _leaf("top_tube", "Top Tube", "Upper main triangle member", "Frame stiffness", "resist_bending", "Aluminum 6061-T6"),
+            _leaf("down_tube", "Down Tube", "Lower main triangle member", "Frame stiffness", "resist_bending", "Aluminum 6061-T6"),
+            _leaf("seat_tube", "Seat Tube", "Seat post interface tube", "Rider support", "carry_rider", "Aluminum 6061-T6"),
+        ],
+        "rear_triangle": [
+            _leaf("seat_stays", "Seat Stays", "Upper rear triangle", "Wheel location", "resist_bending", "Aluminum 6061-T6"),
+            _leaf("chain_stays", "Chain Stays", "Lower rear triangle", "Drivetrain loads", "resist_bending", "Aluminum 6061-T6"),
+        ],
+        "interface_nodes": [
+            _leaf("head_tube", "Head Tube", "Fork steerer interface", "Steering axis", "locate_interfaces", "Aluminum 6061-T6"),
+            _leaf("bottom_bracket_shell", "Bottom Bracket Shell", "Crank axle interface", "Drivetrain interface", "locate_interfaces", "Aluminum 6061-T6"),
+            _leaf("dropouts", "Dropouts", "Axle slots", "Wheel retention", "locate_interfaces", "Aluminum 6061-T6"),
+        ],
+        "deck_system": [
+            _leaf("deck_slab", "Deck Slab", "Traffic surface", "Live load", "carry_deck_load", "Reinforced concrete"),
+            _leaf("stringers", "Stringers", "Deck longitudinal beams", "Load distribution", "carry_deck_load", "Structural steel"),
+        ],
+        "truss_superstructure": [
+            _leaf("top_chord", "Top Chord", "Upper truss chord", "Compression/tension chord", "span_gap", "Structural steel"),
+            _leaf("bottom_chord", "Bottom Chord", "Lower truss chord", "Chord member", "span_gap", "Structural steel"),
+            _leaf("web_diagonals", "Web Diagonals", "Truss diagonals", "Shear transfer", "span_gap", "Structural steel"),
+            _leaf("verticals", "Verticals", "Truss verticals", "Panel points", "transfer_to_supports", "Structural steel"),
+        ],
+        "substructure": [
+            _leaf("abutments", "Abutments", "End supports", "Reactions", "transfer_to_supports", "Reinforced concrete"),
+            _leaf("bearings", "Bearings", "Deck/truss bearings", "Movement allowance", "transfer_to_supports", "Elastomeric bearing"),
+        ],
+        "center_plate": [
+            _leaf("avionics_plate", "Avionics Plate", "Flight controller mount", "Electronics bay", "protect_avionics", "Carbon fiber composite"),
+            _leaf("battery_tray", "Battery Tray", "Battery retention", "Energy storage mount", "protect_avionics", "ABS polymer"),
+        ],
+        "arm_assembly": [
+            _leaf("motor_arms", "Motor Arms", "Boom arms to motors", "Propulsion spacing", "mount_propulsion", "Carbon fiber tube"),
+            _leaf("motor_mounts", "Motor Mounts", "Motor attachment plates", "Motor interface", "mount_propulsion", "Aluminum 6061-T6"),
+        ],
+        "landing_gear": [
+            _leaf("landing_skids", "Landing Skids", "Ground contact", "Landing loads", "resist_vibration", "ABS polymer"),
+        ],
+        "supply_trunk": [
+            _leaf("supply_trunk_duct", "Supply Trunk Duct", "Main supply duct", "Air distribution", "convey_air", "Galvanized steel"),
+            _leaf("trunk_insulation", "Trunk Insulation", "Thermal wrap", "Reduce loss", "seal_paths", "Fiberglass insulation"),
+        ],
+        "branch_runs": [
+            _leaf("branch_ducts", "Branch Ducts", "Room takeoffs", "Zone delivery", "convey_air", "Galvanized steel"),
+            _leaf("dampers", "Balancing Dampers", "Flow control", "Room balance", "control_flow", "Galvanized steel"),
+        ],
+        "return_path": [
+            _leaf("return_duct", "Return Duct", "Return air path", "Recirculation", "convey_air", "Galvanized steel"),
+            _leaf("return_grille", "Return Grille", "Return intake", "Air intake", "seal_paths", "Aluminum"),
+        ],
+        "enclosure_shell": [
+            _leaf("outer_case", "Outer Case", "Pack enclosure", "Impact/seal", "contain_cells", "Aluminum sheet"),
+            _leaf("gasket_seal", "Gasket Seal", "Environmental seal", "Ingress protection", "contain_cells", "EPDM rubber"),
+        ],
+        "module_tray": [
+            _leaf("cell_module_fixture", "Cell Module Fixture", "Module retention", "Locate cells", "contain_cells", "Polymer composite"),
+            _leaf("busbar_isolation", "Busbar Isolation", "Dielectric barriers", "Prevent shorts", "electrical_isolation", "Nomex/polymer"),
+        ],
+        "thermal_system": [
+            _leaf("cooling_plates", "Cooling Plates", "Heat exchange plates", "Cell cooling", "manage_thermal", "Aluminum"),
+            _leaf("thermal_interface", "Thermal Interface", "TIM pads", "Heat path", "manage_thermal", "Thermal pad"),
+        ],
+        "impeller_assembly": [
+            _leaf("impeller", "Impeller", "Rotating hydraulic element", "Momentum transfer", "impart_momentum", "Stainless steel 316"),
+            _leaf("wear_ring", "Wear Ring", "Clearance control", "Efficiency", "impart_momentum", "Bronze"),
+        ],
+        "casing_volute": [
+            _leaf("volute_casing", "Volute Casing", "Pressure boundary", "Flow guidance", "guide_flow", "Cast iron"),
+            _leaf("suction_cover", "Suction Cover", "Inlet cover", "Access/seal", "guide_flow", "Cast iron"),
+        ],
+        "shaft_seal_bearing": [
+            _leaf("pump_shaft", "Pump Shaft", "Torque transmission", "Rotor support", "impart_momentum", "Stainless steel 316"),
+            _leaf("mechanical_seal", "Mechanical Seal", "Shaft sealing", "Leak prevention", "seal_shaft", "SiC/carbon"),
+            _leaf("bearings", "Bearings", "Radial/thrust support", "Rotordynamics", "seal_shaft", "Steel bearing"),
+        ],
+        "finger_mechanism": [
+            _leaf("fingers", "Gripper Fingers", "Contact elements", "Grasp geometry", "contact_object", "Aluminum 6061-T6"),
+            _leaf("finger_linkages", "Finger Linkages", "Kinematic links", "Jaw motion", "actuate_jaws", "Steel"),
+        ],
+        "actuator_drive": [
+            _leaf("servo_actuator", "Servo Actuator", "Motion source", "Power grasp", "actuate_jaws", None),
+            _leaf("gear_reducer", "Gear Reducer", "Torque multiplication", "Actuation", "actuate_jaws", "Steel"),
+        ],
+        "sensor_mount": [
+            _leaf("force_sensor", "Force Sensor", "Grasp force sensing", "Force limit", "sense_force", None),
+        ],
+        "shell_heads": [
+            _leaf("cylindrical_shell", "Cylindrical Shell", "Primary wall", "Pressure containment", "contain_pressure", "Carbon steel SA-516"),
+            _leaf("elliptical_heads", "Elliptical Heads", "End closures", "Pressure containment", "contain_pressure", "Carbon steel SA-516"),
+        ],
+        "nozzles_closures": [
+            _leaf("inlet_nozzle", "Inlet Nozzle", "Fill connection", "Port", "seal_ports", "Carbon steel"),
+            _leaf("outlet_nozzle", "Outlet Nozzle", "Discharge connection", "Port", "seal_ports", "Carbon steel"),
+            _leaf("manway", "Manway", "Inspection access", "Access", "seal_ports", "Carbon steel"),
+        ],
+        "safety_devices": [
+            _leaf("pressure_relief_valve", "Pressure Relief Valve", "Overpressure relief", "Safety", "relieve_overpressure", None),
+            _leaf("rupture_disk", "Rupture Disk", "Secondary relief", "Safety", "relieve_overpressure", "Stainless steel"),
+        ],
+        "rail_system": [
+            _leaf("module_rails", "Module Rails", "Panel mounting rails", "Support modules", "support_modules", "Aluminum extrusion"),
+            _leaf("mid_clamps", "Mid Clamps", "Module clamps", "Retain panels", "support_modules", "Aluminum"),
+        ],
+        "supports_legs": [
+            _leaf("tilt_legs", "Tilt Legs", "Elevated supports", "Tilt angle", "orient_array", "Galvanized steel"),
+            _leaf("purlins", "Purlins", "Cross members", "Rail support", "support_modules", "Galvanized steel"),
+        ],
+        "anchorage": [
+            _leaf("roof_anchors", "Roof / Ground Anchors", "Foundation attachments", "Reaction path", "anchor_to_structure", "Stainless steel"),
+            _leaf("base_plates", "Base Plates", "Anchor interface plates", "Load spread", "anchor_to_structure", "Galvanized steel"),
+        ],
+    }
+)

@@ -1,4 +1,9 @@
-"""Design critic — attacks design for engineering violations."""
+"""Design critic — attacks design for engineering violations.
+
+**self_consistency_check** — rule checks plus optional LLM review of the same
+graph. LLM findings are not ``externally_verified``. Adversarial tests:
+``tests/validator_adversarial/test_design_critic.py``.
+"""
 
 from __future__ import annotations
 
@@ -10,8 +15,9 @@ from core.ir.constraint import CriticIssue, Severity
 from core.ir.design_graph import EngineeringDesignGraph
 from knowledge.decomposition.component_templates import GENERIC_COMPONENT_NAMES
 from knowledge.engineering_rules.material_suitability import MATERIAL_SUITABILITY
-from llm.ollama_client import LLMProvider
+from llm.ollama_client import DeterministicProvider, LLMProvider
 from llm.structured_output import StructuredOutput
+from validation.integrity import VerificationKind, registry_entry
 
 _PROMPT_DIR = Path(__file__).resolve().parents[2] / "llm" / "prompts"
 
@@ -23,9 +29,16 @@ class _CriticResponse(BaseModel):
 class DesignCritic:
     """Review design graph for engineering problems — must always find issues."""
 
+    VALIDATOR_ID = "DesignCritic"
+    VERIFICATION_KIND = VerificationKind.SELF_CONSISTENCY_CHECK
+
     def __init__(self, provider: LLMProvider) -> None:
         self._structured = StructuredOutput(provider)
         self._system_prompt = (_PROMPT_DIR / "critic.txt").read_text()
+
+    @classmethod
+    def verification_metadata(cls):
+        return registry_entry(cls.VALIDATOR_ID)
 
     def review(self, graph: EngineeringDesignGraph) -> list[CriticIssue]:
         rule_issues = self._rule_based_review(graph)
@@ -47,6 +60,10 @@ class DesignCritic:
                 )
             )
         return combined
+
+    def review_rules_only(self, graph: EngineeringDesignGraph) -> list[CriticIssue]:
+        """Rule path only — used in adversarial tests without LLM."""
+        return self._rule_based_review(graph)
 
     def _llm_review(self, graph: EngineeringDesignGraph) -> list[CriticIssue]:
         user_prompt = f"Review this design graph:\n{graph.to_spec_dict()}"

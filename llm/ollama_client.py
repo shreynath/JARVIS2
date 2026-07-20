@@ -1,4 +1,12 @@
-"""Ollama HTTP client and deterministic test provider."""
+"""Ollama HTTP client and deterministic test provider.
+
+``DeterministicProvider`` is a **test fixture**, not a product feature. Its
+keyword-matching branches (gearbox / turbofan / ferrari / pagani / default-to-
+engine) exist only so CI can exercise the pipeline without a live LLM. They
+must never be treated as a real intent interpreter. Live CLI use either
+reaches Ollama or surfaces an explicit degraded/fallback warning (see
+``SemanticKernelPipeline`` Option-1 transparent degraded mode).
+"""
 
 from __future__ import annotations
 
@@ -11,6 +19,10 @@ import requests
 
 from knowledge.decomposition.component_templates import COMPONENT_TEMPLATES
 from knowledge.functional.templates import resolve_functional_template
+from llm.env_loader import load_dotenv
+
+# Ensure gitignored credentials are visible before first OllamaClient construction.
+load_dotenv()
 
 
 class LLMProvider(ABC):
@@ -20,19 +32,39 @@ class LLMProvider(ABC):
     def complete(self, system_prompt: str, user_prompt: str) -> str:
         """Return raw text completion."""
 
+    def provider_label(self) -> str:
+        """Stable identifier for provenance / degradation reporting."""
+        return self.__class__.__name__
+
 
 class OllamaClient(LLMProvider):
-    """HTTP client for local Ollama API."""
+    """HTTP client for local or cloud Ollama API.
+
+    Auth: when ``OLLAMA_API_KEY`` is set (typical for ``https://ollama.com``),
+    requests include ``Authorization: Bearer <key>``. Local hosts do not need a key.
+    See https://docs.ollama.com/api/authentication
+    """
 
     def __init__(
         self,
         host: str | None = None,
         model: str | None = None,
         timeout: float = 120.0,
+        api_key: str | None = None,
     ) -> None:
+        load_dotenv()
         self.host = (host or os.environ.get("OLLAMA_HOST", "http://localhost:11434")).rstrip("/")
         self.model = model or os.environ.get("OLLAMA_MODEL", "llama3.2")
         self.timeout = timeout
+        self.api_key = api_key if api_key is not None else os.environ.get("OLLAMA_API_KEY")
+
+    def provider_label(self) -> str:
+        return f"ollama:{self.model}"
+
+    def _headers(self) -> dict[str, str]:
+        if not self.api_key:
+            return {}
+        return {"Authorization": f"Bearer {self.api_key}"}
 
     def complete(self, system_prompt: str, user_prompt: str) -> str:
         url = f"{self.host}/api/chat"
@@ -45,24 +77,39 @@ class OllamaClient(LLMProvider):
             "stream": False,
             "format": "json",
         }
-        response = requests.post(url, json=payload, timeout=self.timeout)
+        response = requests.post(
+            url, json=payload, timeout=self.timeout, headers=self._headers()
+        )
         response.raise_for_status()
         data = response.json()
         return data["message"]["content"]
 
     def is_available(self) -> bool:
         try:
-            response = requests.get(f"{self.host}/api/tags", timeout=3.0)
+            response = requests.get(
+                f"{self.host}/api/tags", timeout=3.0, headers=self._headers()
+            )
             return response.status_code == 200
         except requests.RequestException:
             return False
 
 
 class DeterministicProvider(LLMProvider):
-    """Rule-based provider for tests and offline use without Ollama."""
+    """TEST FIXTURE ONLY — rule-based stub for CI / offline unit tests.
+
+    Not a product fallback interpreter. Keyword branches below are deliberately
+    narrow (gearbox, turbofan, ferrari, pagani) with everything else defaulting
+    to ``internal_combustion_engine``. That default exists so historical ICE
+    tests keep working; it is *not* a claim that chairs, bikes, or bridges are
+    engines. Production paths that land here must set ``degraded=True`` and a
+    visible warning (see ``SemanticKernelPipeline``).
+    """
 
     def __init__(self, responses: dict[str, Any] | None = None) -> None:
         self._responses = responses or {}
+
+    def provider_label(self) -> str:
+        return "deterministic_fallback"
 
     def complete(self, system_prompt: str, user_prompt: str) -> str:
         role = _detect_role(system_prompt)
@@ -101,6 +148,7 @@ def _detect_role(system_prompt: str) -> str:
 
 
 def _default_intent_response(user_prompt: str) -> dict[str, Any]:
+    """Fixture intent map — NOT a real NLP classifier. See class docstring."""
     lower = user_prompt.lower()
 
     if "gearbox" in lower or "transmission" in lower:

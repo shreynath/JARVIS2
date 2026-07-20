@@ -14,6 +14,10 @@ Inventory of hard-constraint sources (every one must emit ConstraintEvaluation):
 The validator never inspects these collections directly for hard_violations;
 it only aggregates ConstraintEvaluation objects where severity=hard_limit and
 passes=False.
+
+**self_consistency_check** — compares pipeline outputs and knowledge rules,
+not independent external benchmarks. Adversarial tests:
+``tests/validator_adversarial/test_constraint_evaluator.py``.
 """
 
 from __future__ import annotations
@@ -22,14 +26,15 @@ from core.ir.constraint import ConstraintEvaluation, ConstraintSeverity
 from core.ir.design_graph import EngineeringDesignGraph
 from core.reasoning.physics_engine import PhysicsAnalysis
 from knowledge.engineering_rules.material_suitability import MATERIAL_SUITABILITY
+from validation.integrity import stamp_validator
 from validation.schema_validator import ValidationReport
 
 
 class ConstraintEvaluator:
     """Collect ConstraintEvaluation from every hard-constraint producer."""
 
+    VALIDATOR_ID = "ConstraintEvaluator"
     MEAN_PISTON_SPEED_HARD_LIMIT_M_S = 26.0
-
     def collect(
         self,
         graph: EngineeringDesignGraph,
@@ -77,6 +82,7 @@ class ConstraintEvaluator:
                 self._failure_message(evaluation),
                 node_id=evaluation.component_id or evaluation.id,
             )
+        stamp_validator(report, self.VALIDATOR_ID)
         return report
 
     @staticmethod

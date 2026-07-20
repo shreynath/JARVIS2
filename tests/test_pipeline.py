@@ -31,6 +31,7 @@ def test_pipeline_writes_outputs(tmp_path: Path):
     assert (output_dir / "physics_analysis.json").exists()
     assert (output_dir / "assumptions.json").exists()
     assert (output_dir / "validation_report.json").exists()
+    assert (output_dir / "pipeline_status.json").exists()
 
     graph_data = json.loads((output_dir / "engine_design_graph.json").read_text())
     assert graph_data["type"] == "internal_combustion_engine"
@@ -40,6 +41,12 @@ def test_pipeline_writes_outputs(tmp_path: Path):
     assert "requirement_specification" in graph_data
     assert "physics_analysis" in graph_data
     assert "constraint_graph" in graph_data
+    assert graph_data["degraded"] is True
+    assert graph_data["provider_used"] == "deterministic_fallback"
+
+    status = json.loads((output_dir / "pipeline_status.json").read_text())
+    assert status["degraded"] is True
+    assert "warning" in status
 
 
 def test_vague_prompt_initializes_requirements_and_constraint_graph():

@@ -1,0 +1,160 @@
+{
+  "prompt": "design a quadcopter drone frame",
+  "expected_family": "quadcopter_frame",
+  "intent": {
+    "object_type": "quadcopter_frame",
+    "design_goal": "Design a quadcopter frame that supports the UAV components while meeting weight, rigidity, and ease of assembly requirements",
+    "reference_objects": [],
+    "constraints": [],
+    "unknowns": [
+      "motor_type",
+      "battery_capacity",
+      "payload_capacity",
+      "desired_weight",
+      "flight_duration",
+      "flight_altitude"
+    ],
+    "required_domains": [
+      "structural_analysis",
+      "mechanical_design",
+      "materials",
+      "aerodynamics",
+      "electronics_mounting",
+      "manufacturing"
+    ],
+    "raw_input": "design a quadcopter drone frame"
+  },
+  "requirement_spec": {
+    "status": "complete",
+    "object_type": "quadcopter_frame",
+    "design_goal": "Design a quadcopter frame that supports the UAV components while meeting weight, rigidity, and ease of assembly requirements",
+    "requirements": [
+      {
+        "id": "req_object_type",
+        "description": "Design object type resolved as quadcopter_frame",
+        "metric": "object_type",
+        "target_value": "quadcopter_frame",
+        "unit": null,
+        "priority": "critical",
+        "source": "intent_parser",
+        "originating_text": "design a quadcopter drone frame",
+        "affected_assemblies": [
+          "root"
+        ],
+        "affected_components": [],
+        "downstream_design_consequences": [
+          "Selects functional decomposition template",
+          "Defines required engineering decision set",
+          "Initializes constraint graph even when numeric targets are absent"
+        ],
+        "derived_from": [],
+        "satisfies_decisions": [
+          "object_type"
+        ]
+      }
+    ],
+    "required_decisions": [],
+    "resolved_parameters": {},
+    "reference_profile": null,
+    "completeness_rationale": "All required engineering decisions resolved from prompt.",
+    "unrecognized_terms": [],
+    "conflicts": [],
+    "implausible_parameters": []
+  },
+  "functional_analysis": {
+    "primary_function": "Provide safe and efficient charging for electric vehicles",
+    "functions": [
+      {
+        "id": "F1",
+        "name": "Vehicle Detection",
+        "description": "Detects vehicle presence at charging point",
+        "requires": [],
+        "domain": "Electrical"
+      },
+      {
+        "id": "F2",
+        "name": "User Authentication",
+        "description": "Verifies identity before enabling charging",
+        "requires": [
+          "F1"
+        ],
+        "domain": "Information"
+      },
+      {
+        "id": "F3",
+        "name": "Energy Transfer",
+        "description": "Supplies regulated electrical power to vehicle battery",
+        "requires": [
+          "F2"
+        ],
+        "domain": "Electrical"
+      },
+      {
+        "id": "F4",
+        "name": "Vehicle Battery",
+        "description": "Battery of the vehicle receiving charge",
+        "requires": [],
+        "domain": "Electrochemical"
+      }
+    ],
+    "flows": [
+      {
+        "id": "FL1",
+        "flow_type": "information",
+        "source_function_id": "F1",
+        "target_function_id": "F2",
+        "description": "Signal vehicle presence to authentication module"
+      },
+      {
+        "id": "FL2",
+        "flow_type": "information",
+        "source_function_id": "F2",
+        "target_function_id": "F3",
+        "description": "Authentication credentials to energy transfer"
+      },
+      {
+        "id": "FL3",
+        "flow_type": "energy",
+        "source_function_id": "F3",
+        "target_function_id": "F4",
+        "description": "Electrical energy supplied to vehicle battery"
+      }
+    ],
+    "required_assemblies": [
+      {
+        "id": "A1",
+        "name": "Charging Deck Assembly",
+        "function": "Energy Transfer",
+        "purpose": "Physical module for connecting vehicle to charger",
+        "serves_functions": [
+          "F3"
+        ],
+        "parent_assembly_id": "root"
+      }
+    ],
+    "required_domains": [
+      "Electrical",
+      "Information",
+      "Electrochemical"
+    ]
+  },
+  "component_ids": [
+    "component_high_current_connector",
+    "component_power_cable_500a",
+    "component_power_control_module",
+    "component_protective_shielding",
+    "component_grounding_interface"
+  ],
+  "component_names": [
+    "High\u2011Current Connector",
+    "High\u2011Current Power Cable",
+    "Power Conditioning Module",
+    "EMI Shielding and Heat Management System",
+    "Grounding Interface Plate"
+  ],
+  "physics_warnings": [
+    "No physics module registered for object_type='quadcopter_frame'; ICE PhysicsEngine was not invoked."
+  ],
+  "provider_used": "ollama:gpt-oss:20b",
+  "degraded": false
+}

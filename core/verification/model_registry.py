@@ -179,6 +179,38 @@ _PHYSICS: list[ModelDescriptor] = [
         upgrade_priority="HIGH",
         subsystem="physics",
     ),
+    make_descriptor(
+        id="calc_bridge_deck_moment",
+        maturity=ModelMaturity.M2,
+        owner="BridgePhysicsEngine",
+        equation_id="eq_bridge_deck_moment",
+        engineering_reference=_ref_citation("eq_bridge_deck_moment"),
+        validation_status=_status("eq_bridge_deck_moment"),
+        independently_verified=True,
+        known_limitations="Simply-supported UDL beam identity; live load w may be ASSUMED.",
+        impact_level=ImpactLevel.HIGH,
+        affected_outputs=("truss_member_stress", "material_selection"),
+        sensitivity_rank=14,
+        upgrade_priority="HIGH",
+        subsystem="physics",
+    ),
+    make_descriptor(
+        id="calc_truss_member_stress",
+        maturity=ModelMaturity.M3,
+        owner="BridgePhysicsEngine",
+        equation_id="eq_truss_member_stress",
+        engineering_reference=_ref_citation("eq_truss_member_stress"),
+        validation_status=_status("eq_truss_member_stress"),
+        independently_verified=True,
+        known_limitations=(
+            "Truss depth analogy from equivalent beam moment; member area and load bands ASSUMED."
+        ),
+        impact_level=ImpactLevel.CRITICAL,
+        affected_outputs=("material_selection", "validation", "constraints"),
+        sensitivity_rank=4,
+        upgrade_priority="VERY_HIGH",
+        subsystem="physics",
+    ),
 ]
 
 _PLACEHOLDERS: list[ModelDescriptor] = [

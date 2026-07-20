@@ -1,0 +1,447 @@
+{
+  "prompt": "design a pressure vessel for compressed nitrogen storage",
+  "expected_family": "pressure_vessel",
+  "intent": {
+    "object_type": "pressure_vessel",
+    "design_goal": "Design a safe, cost-effective, high-pressure vessel for storing compressed nitrogen at specified service pressures and temperatures.",
+    "reference_objects": [
+      "ASME Boiler and Pressure Vessel Code (BPVC), Section III, Chapter N550"
+    ],
+    "constraints": [
+      {
+        "type": "pressure_rating",
+        "description": "Maximum working pressure must exceed anticipated service pressure by a safety factor of at least 1.5 to 2.0.",
+        "priority": "critical",
+        "value": null
+      },
+      {
+        "type": "temperature_range",
+        "description": "Vessel must operate reliably over the temperature range from ambient (~20\u00b0C) to the maximum expected temperature (~80\u00b0C).",
+        "priority": "high",
+        "value": null
+      },
+      {
+        "type": "material_compatibility",
+        "description": "Material must resist nitrogen corrosion, embrittlement, and maintain mechanical strength at designated pressures.",
+        "priority": "critical",
+        "value": null
+      },
+      {
+        "type": "size_and_weight",
+        "description": "Vessel dimensions and mass should fit within the available storage footprint and comply with handling/transport constraints.",
+        "priority": "medium",
+        "value": null
+      },
+      {
+        "type": "cost_limit",
+        "description": "Design must remain within the project\u2019s budgetary allocation for materials, fabrication, and testing.",
+        "priority": "medium",
+        "value": null
+      }
+    ],
+    "unknowns": [
+      "maximum working pressure (MPa)",
+      "desired storage volume (m\u00b3)",
+      "specific vessel geometry (cylindrical, spherical, etc.)",
+      "ambient operating temperature range",
+      "expected purity or impurities in nitrogen",
+      "installation environment (corrosive, cryogenic, etc.)",
+      "required safety factor specifics",
+      "desired steel grade or alternative material",
+      "number of pressure relief devices or rupture disks",
+      "inspection certification requirements",
+      "regulatory compliance region"
+    ],
+    "required_domains": [
+      "mechanical_design",
+      "materials_engineering",
+      "structural_analysis",
+      "thermodynamics",
+      "fluid_dynamics",
+      "safety_and_compliance",
+      "safety",
+      "materials"
+    ],
+    "raw_input": "design a pressure vessel for compressed nitrogen storage"
+  },
+  "requirement_spec": {
+    "status": "complete",
+    "object_type": "pressure_vessel",
+    "design_goal": "Design a safe, cost-effective, high-pressure vessel for storing compressed nitrogen at specified service pressures and temperatures.",
+    "requirements": [
+      {
+        "id": "req_object_type",
+        "description": "Design object type resolved as pressure_vessel",
+        "metric": "object_type",
+        "target_value": "pressure_vessel",
+        "unit": null,
+        "priority": "critical",
+        "source": "intent_parser",
+        "originating_text": "design a pressure vessel for compressed nitrogen storage",
+        "affected_assemblies": [
+          "root"
+        ],
+        "affected_components": [],
+        "downstream_design_consequences": [
+          "Selects functional decomposition template",
+          "Defines required engineering decision set",
+          "Initializes constraint graph even when numeric targets are absent"
+        ],
+        "derived_from": [],
+        "satisfies_decisions": [
+          "object_type"
+        ]
+      }
+    ],
+    "required_decisions": [],
+    "resolved_parameters": {},
+    "reference_profile": null,
+    "completeness_rationale": "All required engineering decisions resolved from prompt.",
+    "unrecognized_terms": [],
+    "conflicts": [],
+    "implausible_parameters": []
+  },
+  "functional_analysis": {
+    "primary_function": "Design a safe, cost\u2011effective high\u2011pressure vessel for storing compressed nitrogen that meets specified service pressures and temperature range while complying with material, size, weight, and cost constraints.",
+    "functions": [
+      {
+        "id": "f1",
+        "name": "determine_design_parameters",
+        "description": "Establish nominal operating pressure, temperature limits, safety factor, and service condition requirements.",
+        "requires": [],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "f2",
+        "name": "select_material",
+        "description": "Identify material(s) that provide resistance to nitrogen embrittlement, maintain strength at design conditions, and support required safety factor.",
+        "requires": [],
+        "domain": "materials_engineering"
+      },
+      {
+        "id": "f3",
+        "name": "structural_analysis",
+        "description": "Perform finite element or analytic calculations to verify vessel wall thickness and geometry provide required safety margin at maximum design pressure.",
+        "requires": [],
+        "domain": "structural_analysis"
+      },
+      {
+        "id": "f4",
+        "name": "thermal_performance_analysis",
+        "description": "Evaluate temperature rise, thermal expansion, and material property changes over the operational temperature range to ensure integrity.",
+        "requires": [],
+        "domain": "thermodynamics"
+      },
+      {
+        "id": "f5",
+        "name": "geometry_optimization",
+        "description": "Optimize vessel shape, dimensions, and mass to fit footprint constraints while minimizing material usage and cost.",
+        "requires": [],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "f6",
+        "name": "code_compliance",
+        "description": "Verify that design meets applicable pressure vessel codes, safety regulations, and industry standards.",
+        "requires": [],
+        "domain": "safety_and_compliance"
+      },
+      {
+        "id": "f7",
+        "name": "material_testing",
+        "description": "Conduct proof and fatigue tests on selected material specimens to validate performance under high pressure and temperature.",
+        "requires": [],
+        "domain": "materials"
+      },
+      {
+        "id": "f8",
+        "name": "fabrication_planning",
+        "description": "Plan manufacturing processes, welding techniques, and quality control to achieve cost efficiency and dimensional accuracy.",
+        "requires": [],
+        "domain": "mechanical_design"
+      },
+      {
+        "id": "f9",
+        "name": "assembly_and_testing",
+        "description": "Assemble vessel components and perform pressure and leak tests to qualify the final unit.",
+        "requires": [],
+        "domain": "safety"
+      },
+      {
+        "id": "f10",
+        "name": "cost_and_documentation",
+        "description": "Track material, fabrication, testing, and contingency costs; compile design reports and compliance documentation.",
+        "requires": [],
+        "domain": "safety"
+      }
+    ],
+    "flows": [
+      {
+        "id": "flow1",
+        "flow_type": "information",
+        "source_function_id": "f1",
+        "target_function_id": "f2",
+        "description": "Design pressure/temperature data informs material selection."
+      },
+      {
+        "id": "flow2",
+        "flow_type": "information",
+        "source_function_id": "f1",
+        "target_function_id": "f3",
+        "description": "Operating conditions guide structural analysis."
+      },
+      {
+        "id": "flow3",
+        "flow_type": "information",
+        "source_function_id": "f1",
+        "target_function_id": "f4",
+        "description": "Thermal limits direct temperature analysis."
+      },
+      {
+        "id": "flow4",
+        "flow_type": "information",
+        "source_function_id": "f1",
+        "target_function_id": "f5",
+        "description": "Functional sizing constraints used for geometry optimization."
+      },
+      {
+        "id": "flow5",
+        "flow_type": "information",
+        "source_function_id": "f1",
+        "target_function_id": "f10",
+        "description": "Base cost estimate derives from design parameters."
+      },
+      {
+        "id": "flow6",
+        "flow_type": "information",
+        "source_function_id": "f2",
+        "target_function_id": "f3",
+        "description": "Chosen material properties used in structural calculations."
+      },
+      {
+        "id": "flow7",
+        "flow_type": "information",
+        "source_function_id": "f2",
+        "target_function_id": "f4",
+        "description": "Material thermal conductivity informs temperature analysis."
+      },
+      {
+        "id": "flow8",
+        "flow_type": "information",
+        "source_function_id": "f2",
+        "target_function_id": "f10",
+        "description": "Material cost flows to cost tracking."
+      },
+      {
+        "id": "flow9",
+        "flow_type": "information",
+        "source_function_id": "f2",
+        "target_function_id": "f7",
+        "description": "Material specification supplied to testing lab."
+      },
+      {
+        "id": "flow10",
+        "flow_type": "information",
+        "source_function_id": "f3",
+        "target_function_id": "f6",
+        "description": "Structural analysis results used for code compliance."
+      },
+      {
+        "id": "flow11",
+        "flow_type": "information",
+        "source_function_id": "f4",
+        "target_function_id": "f6",
+        "description": "Thermal analysis supports code compliance."
+      },
+      {
+        "id": "flow12",
+        "flow_type": "information",
+        "source_function_id": "f5",
+        "target_function_id": "f6",
+        "description": "Optimized geometry verified against compliance."
+      },
+      {
+        "id": "flow13",
+        "flow_type": "information",
+        "source_function_id": "f5",
+        "target_function_id": "f10",
+        "description": "Optimized dimensions counted in cost."
+      },
+      {
+        "id": "flow14",
+        "flow_type": "information",
+        "source_function_id": "f7",
+        "target_function_id": "f6",
+        "description": "Material test data provides evidence for compliance."
+      },
+      {
+        "id": "flow15",
+        "flow_type": "information",
+        "source_function_id": "f7",
+        "target_function_id": "f10",
+        "description": "Test results included in cost and documentation."
+      },
+      {
+        "id": "flow16",
+        "flow_type": "information",
+        "source_function_id": "f8",
+        "target_function_id": "f9",
+        "description": "Manufacturing plan informs assembly procedure."
+      },
+      {
+        "id": "flow17",
+        "flow_type": "information",
+        "source_function_id": "f9",
+        "target_function_id": "f6",
+        "description": "Pressure test outcome confirms compliance."
+      },
+      {
+        "id": "flow18",
+        "flow_type": "information",
+        "source_function_id": "f9",
+        "target_function_id": "f10",
+        "description": "Testing cost recorded in cost tracking."
+      }
+    ],
+    "required_assemblies": [
+      {
+        "id": "assembly_material_selection",
+        "name": "Material Selection Assembly",
+        "function": "f2",
+        "purpose": "Provide material that satisfies nitrogen compatibility, mechanical strength, and cost constraints.",
+        "serves_functions": [
+          "f2",
+          "f7"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "assembly_structural_integrity",
+        "name": "Structural Integrity Assembly",
+        "function": "f3",
+        "purpose": "Ensure vessel walls provide the required safety factor under maximum operating pressure.",
+        "serves_functions": [
+          "f3",
+          "f6",
+          "f4",
+          "f5"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "assembly_performance_analysis",
+        "name": "Performance Analysis Assembly",
+        "function": "f4",
+        "purpose": "Guarantee vessel operates reliably over the full temperature range and achieves acceptable thermal expansion.",
+        "serves_functions": [
+          "f4",
+          "f5"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "assembly_manufacturing",
+        "name": "Manufacturing Assembly",
+        "function": "f8",
+        "purpose": "Plan fabrication, welding, and quality control to meet cost and dimensional targets.",
+        "serves_functions": [
+          "f8",
+          "f9"
+        ],
+        "parent_assembly_id": "root"
+      },
+      {
+        "id": "assembly_cost_and_docs",
+        "name": "Cost and Documentation Assembly",
+        "function": "f10",
+        "purpose": "Track all cost elements, qualify the vessel, and compile compliance documentation.",
+        "serves_functions": [
+          "f10"
+        ],
+        "parent_assembly_id": "root"
+      }
+    ],
+    "required_domains": [
+      "mechanical_design",
+      "materials_engineering",
+      "structural_analysis",
+      "thermodynamics",
+      "safety_and_compliance",
+      "materials",
+      "safety"
+    ]
+  },
+  "component_ids": [
+    "material_specification",
+    "supplier_evaluation",
+    "proof_test_setup",
+    "fatigue_test_setup",
+    "material_certification",
+    "quality_control_inspector",
+    "test_report_document",
+    "test_gage_set",
+    "vessel_wall_section",
+    "cylindrical_head",
+    "reinforcement_ring",
+    "weld_pattern_spec",
+    "thermal_pressure_analysis_model",
+    "geometry_optimization_grid",
+    "code_compliance_verification",
+    "thermal_insulation_panel",
+    "temperature_monitoring_system",
+    "vessel_shape_optimizer",
+    "weld_joint_design",
+    "welding_procedure_specification",
+    "fabrication_schedule",
+    "fitup_and_tolerance_spec",
+    "welding_quality_control_plan",
+    "assembly_jig_and_fixture",
+    "pressure_test_fixture_system",
+    "cost_tracking",
+    "documentation_management",
+    "regulatory_submission",
+    "material_cost_estimator",
+    "fabrication_cost_controller",
+    "testing_cost_tracker",
+    "project_reporting_tool"
+  ],
+  "component_names": [
+    "Material Specification",
+    "Supplier Evaluation",
+    "Proof Test Setup",
+    "Fatigue Test Setup",
+    "Material Certification",
+    "Quality Control Inspector",
+    "Test Report Document",
+    "Test Gage Set",
+    "Cylindrical Vessel Wall Section",
+    "Cylindrical Head Assembly",
+    "Stress Relief Reinforcement Ring",
+    "Weld Pattern Design Specification",
+    "Finite Element Thermal-Pressure Analysis Model",
+    "Geometry Optimization Grid",
+    "BPVC Code Compliance Verification Process",
+    "High-Temperature Thermal Insulation Panel",
+    "Temperature Sensor Array and Monitoring System",
+    "Geometric Optimization Algorithm Module",
+    "Weld Joint Configuration for Stress Relief",
+    "Welding Procedure Specification (WPS)",
+    "Fabrication Work Schedule",
+    "Fit\u2011Up Tolerance Specification Sheet",
+    "Welding Quality Control and Inspection Plan",
+    "Vessel Assembly Jig & Fixture Set",
+    "Pressure Test Fixture and Measurement System",
+    "Cost Tracking System",
+    "Documentation Management Module",
+    "Regulatory Submission Interface",
+    "Material Cost Estimator",
+    "Fabrication Cost Controller",
+    "Testing Cost Tracker",
+    "Project Reporting Tool"
+  ],
+  "physics_warnings": [
+    "No physics module registered for object_type='pressure_vessel'; ICE PhysicsEngine was not invoked."
+  ],
+  "provider_used": "ollama:gpt-oss:20b",
+  "degraded": false
+}
