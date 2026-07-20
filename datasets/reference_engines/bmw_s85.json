@@ -1,0 +1,28 @@
+{
+  "id": "bmw_s85",
+  "name": "BMW S85",
+  "manufacturer": "BMW",
+  "year": 2005,
+  "architecture": "V10",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "BMW M5 E60 published specifications"
+  ],
+  "published": {
+    "horsepower": 500,
+    "max_rpm": 8250,
+    "displacement_l": 4.999,
+    "bore_mm": 92.0,
+    "stroke_mm": 75.2,
+    "cylinder_count": 10,
+    "torque_nm": 520,
+    "published_source": "BMW S85B50 OEM",
+    "compression_ratio": null,
+    "mass_kg": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 20.68,
+    "note": "2 * 0.0752 * 8250 / 60"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

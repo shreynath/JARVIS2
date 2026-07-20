@@ -1,0 +1,11 @@
+{
+  "component": "piston",
+  "material": "Forged aluminum class",
+  "yield_strength_mpa": null,
+  "fatigue_strength_mpa": null,
+  "temperature_limit_c": 200,
+  "application": "formula_historic",
+  "engine": "Cosworth DFV class",
+  "source": "Historic F1 forged piston practice; exact alloy unpublished \u2014 strengths null",
+  "confidence": "low"
+}

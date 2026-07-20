@@ -1,0 +1,13 @@
+{
+  "family": "diesel",
+  "engine_id": "duramax_lml_6_6",
+  "engine": "GM Duramax LML 6.6 class",
+  "architecture": "V8",
+  "rpm": 3000,
+  "hp": 397,
+  "torque_nm": 1037,
+  "displacement_l": 6.6,
+  "aspiration": "turbocharged diesel",
+  "fuel": "diesel",
+  "source": "Public Duramax LML published figures"
+}

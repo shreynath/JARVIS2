@@ -1,0 +1,11 @@
+{
+  "component": "valve",
+  "material": "Stainless Steel 21-4N class",
+  "yield_strength_mpa": 650,
+  "fatigue_strength_mpa": 300,
+  "temperature_limit_c": 750,
+  "application": "intake_valve",
+  "engine": "Production gasoline engines",
+  "source": "Industry intake-valve stainless class",
+  "confidence": "medium"
+}

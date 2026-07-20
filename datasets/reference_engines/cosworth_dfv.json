@@ -14,11 +14,12 @@
     "stroke_mm": 64.8,
     "cylinder_count": 8,
     "compression_ratio": null,
-    "mean_piston_speed_m_s": null
+    "mean_piston_speed_m_s": null,
+    "mass_kg": null
   },
   "derived_checks": {
     "mean_piston_speed_at_redline_m_s": 19.44,
-    "note": "2 * 0.0648 * 9000 / 60 — HP/RPM are era-approximate"
+    "note": "2 * 0.0648 * 9000 / 60 \u2014 HP/RPM are era-approximate"
   },
   "materials": {
     "connecting_rods": "unknown_public",

@@ -1,0 +1,13 @@
+{
+  "engine": "Mercedes-Benz M159",
+  "engine_id": "mercedes_m159",
+  "architecture": "V8",
+  "rpm": 7200,
+  "hp": 563,
+  "torque_nm": 650,
+  "displacement_l": 6.208,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Mercedes-Benz SLS AMG published OEM specifications",
+  "family": "naturally_aspirated"
+}

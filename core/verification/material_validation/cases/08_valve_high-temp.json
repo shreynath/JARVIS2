@@ -1,0 +1,11 @@
+{
+  "component": "valve",
+  "material": "Inconel 718 class",
+  "yield_strength_mpa": 1034,
+  "fatigue_strength_mpa": 520,
+  "temperature_limit_c": 700,
+  "application": "exhaust_valve",
+  "engine": "High-temp exhaust applications",
+  "source": "Industry exhaust-valve nickel alloy class",
+  "confidence": "medium"
+}

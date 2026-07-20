@@ -1,0 +1,13 @@
+{
+  "engine": "Ferrari F140 B (approx. Enzo/FXX family class)",
+  "engine_id": "ferrari_f140",
+  "architecture": "V12",
+  "rpm": 8200,
+  "hp": 660,
+  "torque_nm": null,
+  "displacement_l": 6.0,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Public Ferrari Enzo era F140 published figures (approximate class reference)",
+  "family": "naturally_aspirated"
+}

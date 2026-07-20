@@ -78,6 +78,71 @@ def combustion_temp_empirical_c(cooling_heat_kw: float) -> float:
     return 180.0 + min(120.0, cooling_heat_kw / 8.0)
 
 
+def bore_mm_from_displacement_stroke(
+    displacement_l: float,
+    cylinder_count: float,
+    stroke_mm: float,
+) -> float:
+    """Independent geometry: bore from swept volume identity."""
+    if cylinder_count == 0 or stroke_mm == 0:
+        raise ZeroDivisionError("cylinder_count and stroke must be nonzero")
+    per_cyl_m3 = (displacement_l / 1000.0) / cylinder_count
+    stroke_m = stroke_mm / 1000.0
+    bore_m = math.sqrt(4.0 * per_cyl_m3 / (math.pi * stroke_m))
+    return bore_m * 1000.0
+
+
+def piston_area_m2(bore_mm: float) -> float:
+    bore_m = bore_mm / 1000.0
+    return math.pi * bore_m**2 / 4.0
+
+
+def crank_radius_mm(stroke_mm: float) -> float:
+    return stroke_mm / 2.0
+
+
+def piston_shell_mass_kg(
+    bore_mm: float,
+    stroke_mm: float,
+    *,
+    density_kg_m3: float = 2700.0,
+    crown_frac: float = 0.08,
+    skirt_h_frac: float = 0.55,
+    wall_frac: float = 0.04,
+) -> float:
+    """Independent reimplementation of ReciprocatingMassModel piston body mass."""
+    bore_m = bore_mm / 1000.0
+    stroke_m = stroke_mm / 1000.0
+    crown_t = crown_frac * bore_m
+    skirt_h = skirt_h_frac * stroke_m
+    wall_t = wall_frac * bore_m
+    crown_vol = math.pi * bore_m**2 / 4.0 * crown_t
+    skirt_vol = math.pi * ((bore_m / 2.0) ** 2 - ((bore_m / 2.0) - wall_t) ** 2) * skirt_h
+    return density_kg_m3 * (crown_vol + skirt_vol)
+
+
+def euler_buckling_load_n(
+    youngs_modulus_pa: float,
+    second_moment_m4: float,
+    length_m: float,
+    *,
+    k: float = 1.0,
+) -> float:
+    if length_m == 0:
+        raise ZeroDivisionError("length must be nonzero")
+    return (math.pi**2) * youngs_modulus_pa * second_moment_m4 / (k * length_m) ** 2
+
+
+def i_beam_area_m2(
+    *,
+    web_thickness: float,
+    depth: float,
+    flange_width: float,
+    flange_thickness: float,
+) -> float:
+    return web_thickness * (depth - 2 * flange_thickness) + 2 * flange_width * flange_thickness
+
+
 def percent_error(expected: float, actual: float) -> float:
     if expected == 0:
         return 0.0 if actual == 0 else float("inf")

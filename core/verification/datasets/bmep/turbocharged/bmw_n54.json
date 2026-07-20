@@ -1,0 +1,13 @@
+{
+  "family": "turbocharged",
+  "engine_id": "bmw_n54",
+  "engine": "BMW N54 class",
+  "architecture": "Inline-6",
+  "rpm": 7000,
+  "hp": 300,
+  "torque_nm": 400,
+  "displacement_l": 3.0,
+  "aspiration": "turbocharged",
+  "fuel": "gasoline",
+  "source": "Public BMW N54 class specs"
+}

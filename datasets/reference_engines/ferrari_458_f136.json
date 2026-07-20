@@ -1,0 +1,28 @@
+{
+  "id": "ferrari_458_f136",
+  "name": "Ferrari 458 Italia (F136)",
+  "manufacturer": "Ferrari",
+  "year": 2009,
+  "architecture": "V8",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Ferrari 458 Italia published OEM specifications"
+  ],
+  "published": {
+    "horsepower": 562,
+    "max_rpm": 9000,
+    "displacement_l": 4.499,
+    "bore_mm": 94.0,
+    "stroke_mm": 81.0,
+    "cylinder_count": 8,
+    "torque_nm": 540,
+    "compression_ratio": 12.5,
+    "mass_kg": null,
+    "published_source": "Ferrari 458 Italia OEM"
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 24.3,
+    "note": "2 * 0.081 * 9000 / 60"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

@@ -1,0 +1,13 @@
+{
+  "family": "aircraft",
+  "engine_id": "rotax_912uls",
+  "engine": "Rotax 912 ULS class",
+  "architecture": "Flat-4",
+  "rpm": 5800,
+  "hp": 100,
+  "torque_nm": null,
+  "displacement_l": 1.352,
+  "aspiration": "Naturally aspirated",
+  "fuel": "aviation_gasoline",
+  "source": "Public Rotax 912 ULS published figures"
+}

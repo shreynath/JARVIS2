@@ -1,0 +1,13 @@
+{
+  "family": "motorcycle",
+  "engine_id": "yamaha_r1_crossplane",
+  "engine": "Yamaha YZF-R1 crossplane class",
+  "architecture": "Inline-4",
+  "rpm": 14500,
+  "hp": 200,
+  "torque_nm": 112,
+  "displacement_l": 0.998,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Public Yamaha R1 published specifications (class)"
+}

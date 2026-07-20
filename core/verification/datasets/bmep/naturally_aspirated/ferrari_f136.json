@@ -1,0 +1,13 @@
+{
+  "engine": "Ferrari F136",
+  "engine_id": "ferrari_f136",
+  "architecture": "V8",
+  "rpm": 8500,
+  "hp": 490,
+  "torque_nm": 465,
+  "displacement_l": 4.308,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Ferrari F430 published specifications (public OEM figures)",
+  "family": "naturally_aspirated"
+}

@@ -1,0 +1,13 @@
+{
+  "family": "turbocharged",
+  "engine_id": "subaru_ej257",
+  "engine": "Subaru EJ257 class",
+  "architecture": "Flat-4",
+  "rpm": 6800,
+  "hp": 305,
+  "torque_nm": 393,
+  "displacement_l": 2.457,
+  "aspiration": "turbocharged",
+  "fuel": "gasoline",
+  "source": "Public Subaru WRX STI EJ257 class specs"
+}

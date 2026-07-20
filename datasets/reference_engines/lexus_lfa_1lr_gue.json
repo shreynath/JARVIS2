@@ -1,0 +1,28 @@
+{
+  "id": "lexus_lfa_1lr_gue",
+  "name": "Lexus LFA 1LR-GUE",
+  "manufacturer": "Lexus / Yamaha",
+  "year": 2010,
+  "architecture": "V10",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Lexus LFA published OEM specifications"
+  ],
+  "published": {
+    "horsepower": 552,
+    "max_rpm": 9000,
+    "displacement_l": 4.805,
+    "bore_mm": 88.0,
+    "stroke_mm": 79.0,
+    "cylinder_count": 10,
+    "torque_nm": 480,
+    "compression_ratio": 12.0,
+    "mass_kg": null,
+    "published_source": "Lexus LFA OEM"
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 23.7,
+    "note": "2 * 0.079 * 9000 / 60"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

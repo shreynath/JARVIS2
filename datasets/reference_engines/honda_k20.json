@@ -1,0 +1,28 @@
+{
+  "id": "honda_k20",
+  "name": "Honda K20A",
+  "manufacturer": "Honda",
+  "year": 2001,
+  "architecture": "Inline-4",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Honda Integra Type R DC5 published specifications"
+  ],
+  "published": {
+    "horsepower": 220,
+    "max_rpm": 8400,
+    "displacement_l": 1.998,
+    "bore_mm": 86.0,
+    "stroke_mm": 86.0,
+    "cylinder_count": 4,
+    "torque_nm": 206,
+    "published_source": "Honda K20A OEM",
+    "compression_ratio": null,
+    "mass_kg": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 24.08,
+    "note": "2 * 0.086 * 8400 / 60"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

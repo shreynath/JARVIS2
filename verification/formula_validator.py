@@ -71,17 +71,40 @@ def validate_physics_json(physics: dict[str, Any]) -> dict[str, Any]:
 
     stress = _by_id(physics, "calc_rod_stress_requirement")
     if stress and stress.get("status") == "computed":
-        load_low = float(stress["inputs"]["load_low_n"])
-        load_high = float(stress["inputs"]["load_high_n"])
-        area_low = float(stress["inputs"]["area_low_m2"])
-        area_high = float(stress["inputs"]["area_high_m2"])
-        # JARVIS range uses extrema across combinations; check endpoints of formula identity.
+        inputs = stress.get("inputs") or {}
+        load_low = float(inputs["load_low_n"])
+        load_high = float(inputs["load_high_n"])
         sr = stress.get("value_range") or [stress["result"], stress["result"]]
-        # Lower bound of stress uses min(load)/max(area); upper uses max(load)/min(area)
-        exp_low = rod_stress_mpa(load_low, area_high)
-        exp_high = rod_stress_mpa(load_high, area_low)
-        records.append(verify_record("rod_stress_low", exp_low, float(sr[0]), unit="MPa", pass_tol=0.5, warn_tol=2.0))
-        records.append(verify_record("rod_stress_high", exp_high, float(sr[1]), unit="MPa", pass_tol=0.5, warn_tol=2.0))
+        if "area_low_m2" in inputs and "area_high_m2" in inputs:
+            # Legacy Phase-4 assumed-area identity path
+            area_low = float(inputs["area_low_m2"])
+            area_high = float(inputs["area_high_m2"])
+            exp_low = rod_stress_mpa(load_low, area_high)
+            exp_high = rod_stress_mpa(load_high, area_low)
+            records.append(
+                verify_record("rod_stress_low", exp_low, float(sr[0]), unit="MPa", pass_tol=0.5, warn_tol=2.0)
+            )
+            records.append(
+                verify_record("rod_stress_high", exp_high, float(sr[1]), unit="MPa", pass_tol=0.5, warn_tol=2.0)
+            )
+        else:
+            # Phase 5.0 ConnectingRodModel path — range extrema must be ordered and positive.
+            records.append(
+                {
+                    "name": "rod_stress_geometry_model",
+                    "expected": "geometry_aware_section",
+                    "actual_range": sr,
+                    "unit": "MPa",
+                    "status": "pass" if float(sr[0]) > 0 and float(sr[1]) >= float(sr[0]) else "fail",
+                    "note": (
+                        "Absolute σ=F/A_assumed identity retired; "
+                        "independent section checks live in tests/validation/test_rod_models.py"
+                    ),
+                    "rod_model": inputs.get("rod_model"),
+                    "buckling_margin_min": inputs.get("buckling_margin_min"),
+                    "fatigue_margin_min": inputs.get("fatigue_margin_min"),
+                }
+            )
 
     heat = _by_id(physics, "calc_heat_rejection")
     if heat and heat.get("status") == "computed":

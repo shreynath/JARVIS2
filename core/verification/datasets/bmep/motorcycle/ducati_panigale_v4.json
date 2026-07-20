@@ -1,0 +1,13 @@
+{
+  "family": "motorcycle",
+  "engine_id": "ducati_panigale_v4",
+  "engine": "Ducati Panigale V4 class",
+  "architecture": "V4",
+  "rpm": 14500,
+  "hp": 214,
+  "torque_nm": 124,
+  "displacement_l": 1.103,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Public Ducati Panigale V4 published specifications (class)"
+}

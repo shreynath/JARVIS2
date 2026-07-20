@@ -1,0 +1,13 @@
+{
+  "engine": "Ferrari F154",
+  "engine_id": "ferrari_f154",
+  "architecture": "V8",
+  "rpm": 7500,
+  "hp": 560,
+  "torque_nm": 755,
+  "displacement_l": 3.855,
+  "aspiration": "Twin turbocharged",
+  "fuel": "gasoline",
+  "source": "Ferrari California T / 488 published specifications",
+  "family": "turbocharged"
+}

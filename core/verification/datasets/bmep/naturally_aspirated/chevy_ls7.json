@@ -1,0 +1,13 @@
+{
+  "engine": "Chevrolet LS7",
+  "engine_id": "chevy_ls7",
+  "architecture": "V8",
+  "rpm": 7000,
+  "hp": 505,
+  "torque_nm": null,
+  "displacement_l": 7.011,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "GM LS7 published specifications (Corvette Z06 era)",
+  "family": "naturally_aspirated"
+}

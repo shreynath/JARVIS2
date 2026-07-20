@@ -1,0 +1,13 @@
+{
+  "engine": "Porsche 991 Turbo",
+  "engine_id": "porsche_991_turbo",
+  "architecture": "Flat-6",
+  "rpm": 6800,
+  "hp": 520,
+  "torque_nm": 660,
+  "displacement_l": 3.8,
+  "aspiration": "Twin turbocharged",
+  "fuel": "gasoline",
+  "source": "Porsche 991 Turbo published OEM specifications",
+  "family": "turbocharged"
+}

@@ -14,11 +14,12 @@
     "stroke_mm": 111.1,
     "cylinder_count": 4,
     "compression_ratio": 8.7,
-    "mean_piston_speed_m_s": null
+    "mean_piston_speed_m_s": null,
+    "mass_kg": null
   },
   "derived_checks": {
     "mean_piston_speed_at_redline_m_s": 9.999,
-    "note": "2 * 0.1111 * 2700 / 60 ≈ 10.0 m/s"
+    "note": "2 * 0.1111 * 2700 / 60 \u2248 10.0 m/s"
   },
   "materials": {
     "connecting_rods": "unknown_public",

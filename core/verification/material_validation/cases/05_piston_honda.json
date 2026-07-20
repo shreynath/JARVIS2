@@ -1,0 +1,11 @@
+{
+  "component": "piston",
+  "material": "2618 Forged Aluminum class",
+  "yield_strength_mpa": 440,
+  "fatigue_strength_mpa": 125,
+  "temperature_limit_c": 200,
+  "application": "high_rpm_gasoline",
+  "engine": "Honda F20C / race piston practice",
+  "source": "Common high-RPM forged piston alloy class; application literature",
+  "confidence": "medium"
+}

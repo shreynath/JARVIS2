@@ -1,0 +1,13 @@
+{
+  "family": "motorcycle",
+  "engine_id": "kawasaki_zx10r",
+  "engine": "Kawasaki ZX-10R class",
+  "architecture": "Inline-4",
+  "rpm": 13500,
+  "hp": 203,
+  "torque_nm": 115,
+  "displacement_l": 0.998,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Public Kawasaki ZX-10R published specifications (class)"
+}

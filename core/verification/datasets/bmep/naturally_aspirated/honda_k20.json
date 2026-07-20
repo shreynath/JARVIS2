@@ -1,0 +1,13 @@
+{
+  "engine": "Honda K20A",
+  "engine_id": "honda_k20",
+  "architecture": "Inline-4",
+  "rpm": 8400,
+  "hp": 220,
+  "torque_nm": 206,
+  "displacement_l": 1.998,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Honda Integra Type R DC5 published specifications",
+  "family": "naturally_aspirated"
+}

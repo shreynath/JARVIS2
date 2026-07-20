@@ -1,0 +1,11 @@
+{
+  "component": "connecting_rod",
+  "material": "Titanium 6Al-4V class",
+  "yield_strength_mpa": 880,
+  "fatigue_strength_mpa": 510,
+  "temperature_limit_c": 400,
+  "application": "motorcycle_high_rpm",
+  "engine": "Yamaha R1 class",
+  "source": "Public sportbike titanium rod aftermarket/OEM race practice; treat as class evidence",
+  "confidence": "low"
+}

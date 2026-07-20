@@ -1,0 +1,13 @@
+{
+  "family": "turbocharged",
+  "engine_id": "amg_m177",
+  "engine": "Mercedes-AMG M177 class",
+  "architecture": "V8",
+  "rpm": 6750,
+  "hp": 503,
+  "torque_nm": 700,
+  "displacement_l": 4.0,
+  "aspiration": "twin turbocharged",
+  "fuel": "gasoline",
+  "source": "Public AMG M177 class specs"
+}

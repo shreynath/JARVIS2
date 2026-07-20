@@ -1,0 +1,13 @@
+{
+  "engine": "Ferrari 812 Superfast (F140)",
+  "engine_id": "ferrari_812_f140",
+  "architecture": "V12",
+  "rpm": 8900,
+  "hp": 789,
+  "torque_nm": 718,
+  "displacement_l": 6.496,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Ferrari 812 Superfast published OEM specifications",
+  "family": "naturally_aspirated"
+}

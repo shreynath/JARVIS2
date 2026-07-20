@@ -1,0 +1,13 @@
+{
+  "family": "turbocharged",
+  "engine_id": "ford_ecoboost_3_5",
+  "engine": "Ford 3.5 EcoBoost class",
+  "architecture": "V6",
+  "rpm": 5700,
+  "hp": 365,
+  "torque_nm": 569,
+  "displacement_l": 3.5,
+  "aspiration": "turbocharged",
+  "fuel": "gasoline",
+  "source": "Public Ford F-150 3.5 EcoBoost class specs"
+}

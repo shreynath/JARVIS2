@@ -1,0 +1,29 @@
+{
+  "id": "ferrari_f140",
+  "name": "Ferrari F140 B (Enzo/FXX family class)",
+  "architecture": "V12",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Public Ferrari Enzo-era F140 published figures (class reference)"
+  ],
+  "published": {
+    "horsepower": 660,
+    "max_rpm": 8200,
+    "displacement_l": 6.0,
+    "bore_mm": 92.0,
+    "stroke_mm": 75.2,
+    "cylinder_count": 12,
+    "torque_nm": null,
+    "compression_ratio": 11.2,
+    "mean_piston_speed_m_s": null,
+    "peak_piston_acceleration_m_s2": null,
+    "mass_kg": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 20.55,
+    "note": "2 * 0.0752 * 8200 / 60"
+  },
+  "data_quality": "manufacturer_class",
+  "caveat": "Exact SKU variants differ; class reference, not a single homologation sheet.",
+  "campaign": "high_rpm_dynamics"
+}

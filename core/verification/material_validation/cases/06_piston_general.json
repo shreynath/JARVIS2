@@ -1,0 +1,11 @@
+{
+  "component": "piston",
+  "material": "4032 Forged Aluminum class",
+  "yield_strength_mpa": 380,
+  "fatigue_strength_mpa": 110,
+  "temperature_limit_c": 200,
+  "application": "street_performance",
+  "engine": "General NA performance class",
+  "source": "Catalog/application literature",
+  "confidence": "medium"
+}

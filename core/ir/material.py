@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -18,8 +20,8 @@ class MaterialSpec(BaseModel):
     source: str = "knowledge.materials.catalog"
     suitable_for: list[str] = Field(default_factory=list)
     selection_rationale: str = ""
-    selection_metrics: dict[str, str | float | int | bool | None] = Field(default_factory=dict)
-    candidate_rankings: list[dict[str, str | float | int | bool | None]] = Field(default_factory=list)
+    selection_metrics: dict[str, Any] = Field(default_factory=dict)
+    candidate_rankings: list[dict[str, Any]] = Field(default_factory=list)
 
     @classmethod
     def from_catalog(cls, key: str) -> MaterialSpec | None:

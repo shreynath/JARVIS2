@@ -1,0 +1,13 @@
+{
+  "engine": "Nissan VR38DETT",
+  "engine_id": "nissan_vr38dett",
+  "architecture": "V6",
+  "rpm": 6800,
+  "hp": 480,
+  "torque_nm": 588,
+  "displacement_l": 3.799,
+  "aspiration": "Twin turbocharged",
+  "fuel": "gasoline",
+  "source": "Nissan GT-R R35 published specifications",
+  "family": "turbocharged"
+}

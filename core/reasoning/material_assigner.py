@@ -11,6 +11,12 @@ from core.ir.material import MaterialSpec
 from core.ir.requirement_spec import RequirementSpecification
 from core.materials.component_role import ComponentRole, role_for_component
 from core.materials.material_decision import MaterialDecision
+from core.materials.material_requirement import (
+    MaterialRequirementEvidence,
+    build_piston_requirement,
+    build_structural_rod_requirement,
+    unknown_requirement,
+)
 from core.reasoning.physics_engine import PhysicsAnalysis
 from knowledge.materials.catalog import MATERIAL_CATALOG
 
@@ -99,6 +105,7 @@ class MaterialAssigner:
 
             requirement = self._requirement_for_role(role, comp.id, physics_analysis)
             if requirement is None:
+                unk = unknown_requirement(comp.id, "No computed physics pathway for this role")
                 self.decisions.append(
                     MaterialDecision(
                         component_id=comp.id,
@@ -108,6 +115,7 @@ class MaterialAssigner:
                         requirement_value=None,
                         evidence=[],
                         confidence="UNKNOWN",
+                        requirement_evidence=unk.to_dict(),
                     )
                 )
                 continue
@@ -123,6 +131,7 @@ class MaterialAssigner:
                 )
                 for calc_id in requirement.evidence_calc_ids
             ]
+            req_packet = self._evidence_packet(requirement, comp.id, selected, rankings)
             if selected is not None:
                 evidence.append(
                     Evidence(
@@ -133,6 +142,11 @@ class MaterialAssigner:
                         source_calc_id=None,
                     )
                 )
+                # Attach structured requirement evidence onto selection metrics.
+                if selected.selection_metrics is not None:
+                    selected.selection_metrics["requirement_evidence"] = req_packet
+                else:
+                    selected.selection_metrics = {"requirement_evidence": req_packet}
                 comp.material_spec = selected
                 comp.material = selected.name
                 self.decisions.append(
@@ -144,6 +158,7 @@ class MaterialAssigner:
                         requirement_value=requirement.required_yield_mpa,
                         evidence=evidence,
                         confidence="high" if requirement.evidence_calc_ids else "UNKNOWN",
+                        requirement_evidence=req_packet,
                     )
                 )
                 continue
@@ -157,6 +172,7 @@ class MaterialAssigner:
                     requirement_value=requirement.required_yield_mpa,
                     evidence=evidence,
                     confidence="UNKNOWN",
+                    requirement_evidence=req_packet,
                 )
             )
             best = rankings[0] if rankings else {}
@@ -171,6 +187,7 @@ class MaterialAssigner:
                     "candidate_rankings": rankings,
                     "best_catalog_name": best.get("name"),
                     "best_limiting_margin": best.get("limiting_margin"),
+                    "requirement_evidence": req_packet,
                     "reason": (
                         f"No catalog material meets hard thresholds for {comp.id}: "
                         f"required yield {requirement.required_yield_mpa:g} MPa, "
@@ -319,6 +336,80 @@ class MaterialAssigner:
         # PRESSURE_BOUNDARY / THERMAL_SYSTEM / FLUID_COMPONENT have no standalone
         # computed yield/fatigue pathway in the Phase 1 physics engine — refuse assignment.
         return None
+
+    @staticmethod
+    def _evidence_packet(
+        requirement: MaterialRequirement,
+        component_id: str,
+        selected: MaterialSpec | None,
+        rankings: list[dict[str, str | float | int | bool | None]],
+    ) -> dict[str, object]:
+        if component_id == "pistons":
+            packet = build_piston_requirement(
+                component=component_id,
+                stress_mpa=requirement.required_yield_mpa / 0.55
+                if requirement.required_yield_mpa
+                else 0.0,
+                temperature_c=requirement.required_temperature_c,
+                computed_from=list(requirement.evidence_calc_ids),
+            )
+        elif requirement.role == ComponentRole.STRUCTURAL_LOAD_PATH.value:
+            packet = build_structural_rod_requirement(
+                component=component_id,
+                stress_mpa=requirement.required_yield_mpa / 1.25
+                if requirement.required_yield_mpa
+                else 0.0,
+                temperature_c=requirement.required_temperature_c,
+                computed_from=list(requirement.evidence_calc_ids),
+            )
+        else:
+            packet = MaterialRequirementEvidence(
+                component=component_id,
+                required_properties={
+                    "yield_mpa": requirement.required_yield_mpa,
+                    "fatigue_mpa": requirement.required_fatigue_mpa,
+                    "temperature_c": requirement.required_temperature_c,
+                },
+                computed_from=list(requirement.evidence_calc_ids),
+                load_case="stress_derived",
+                temperature_c=requirement.required_temperature_c,
+                safety_factor={},
+                role=requirement.role,
+                status="computed",
+            )
+        packet.reason_for_selection = (
+            None
+            if selected is None
+            else (
+                f"Selected {selected.name} because computed load evidence requires "
+                f"yield≥{requirement.required_yield_mpa:.1f} MPa, "
+                f"fatigue≥{requirement.required_fatigue_mpa:.1f} MPa, "
+                f"temperature≥{requirement.required_temperature_c:.1f} C "
+                f"(load_source={requirement.source})."
+            )
+        )
+        alts = []
+        for r in rankings[:8]:
+            rejected_for = None
+            if not r.get("hard_constraints_met"):
+                # Identify limiting property.
+                margins = {
+                    "yield": float(r.get("yield_margin") or 0),
+                    "fatigue": float(r.get("fatigue_margin") or 0),
+                    "temperature": float(r.get("thermal_margin") or 0),
+                }
+                rejected_for = min(margins, key=margins.get)  # type: ignore[arg-type]
+            alts.append(
+                {
+                    "name": r.get("name"),
+                    "hard_constraints_met": r.get("hard_constraints_met"),
+                    "limiting_margin": r.get("limiting_margin"),
+                    "rejected_property": rejected_for,
+                    "selected": selected is not None and r.get("name") == selected.name,
+                }
+            )
+        packet.alternatives_considered = alts
+        return packet.to_dict()
 
     @staticmethod
     def _computed_value(physics_analysis: PhysicsAnalysis | None, calc_id: str) -> float | None:

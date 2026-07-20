@@ -1,0 +1,21 @@
+{
+  "engine_id": "bmw_s85",
+  "engine_name": "BMW S85",
+  "rpm": 8250,
+  "stroke_mm": 75.2,
+  "rod_length_mm": null,
+  "piston_mass_g": null,
+  "rod_mass_g": null,
+  "bore_mm": 92.0,
+  "reported_component_data": {
+    "connecting_rods_material": null,
+    "pistons_material": null,
+    "displacement_l": 4.999,
+    "cylinder_count": 10,
+    "aspiration": "Naturally aspirated",
+    "architecture": "V10"
+  },
+  "source": "BMW M5 E60 published specifications",
+  "confidence": "missing_masses",
+  "notes": "OEM geometry/RPM published; absolute piston/rod mass and rod length not in public dataset \u2014 left null (no invention)."
+}

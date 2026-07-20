@@ -1,0 +1,28 @@
+{
+  "id": "mercedes_m120",
+  "name": "Mercedes-Benz M120",
+  "manufacturer": "Mercedes-Benz",
+  "year": 1991,
+  "architecture": "V12",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Mercedes-Benz S 600 / SL 600 published specifications"
+  ],
+  "published": {
+    "horsepower": 402,
+    "max_rpm": 5800,
+    "displacement_l": 6.0,
+    "bore_mm": 89.0,
+    "stroke_mm": 80.2,
+    "cylinder_count": 12,
+    "torque_nm": 580,
+    "published_source": "Mercedes M120 OEM",
+    "compression_ratio": null,
+    "mass_kg": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 15.51,
+    "note": "2 * 0.0802 * 5800 / 60"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

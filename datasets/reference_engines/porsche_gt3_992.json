@@ -14,7 +14,8 @@
     "stroke_mm": 81.5,
     "cylinder_count": 6,
     "compression_ratio": 13.3,
-    "mean_piston_speed_m_s": null
+    "mean_piston_speed_m_s": null,
+    "mass_kg": null
   },
   "derived_checks": {
     "mean_piston_speed_at_redline_m_s": 24.45,

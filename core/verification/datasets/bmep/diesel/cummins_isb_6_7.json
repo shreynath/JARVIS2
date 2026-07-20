@@ -1,0 +1,13 @@
+{
+  "family": "diesel",
+  "engine_id": "cummins_isb_6_7",
+  "engine": "Cummins ISB 6.7 class",
+  "architecture": "Inline-6",
+  "rpm": 3000,
+  "hp": 350,
+  "torque_nm": 880,
+  "displacement_l": 6.7,
+  "aspiration": "turbocharged diesel",
+  "fuel": "diesel",
+  "source": "Public Cummins ISB 6.7 class published figures"
+}

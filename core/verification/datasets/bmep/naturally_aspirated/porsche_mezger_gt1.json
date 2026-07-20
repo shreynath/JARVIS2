@@ -1,0 +1,13 @@
+{
+  "engine": "Porsche Mezger GT1-derived",
+  "engine_id": "porsche_mezger_gt1",
+  "architecture": "Flat-6",
+  "rpm": 7800,
+  "hp": 360,
+  "torque_nm": 370,
+  "displacement_l": 3.6,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Porsche 911 GT3 996 Mezger published specifications",
+  "family": "naturally_aspirated"
+}

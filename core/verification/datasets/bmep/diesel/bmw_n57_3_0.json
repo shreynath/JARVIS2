@@ -1,0 +1,13 @@
+{
+  "family": "diesel",
+  "engine_id": "bmw_n57_3_0",
+  "engine": "BMW N57 3.0d class",
+  "architecture": "Inline-6",
+  "rpm": 4000,
+  "hp": 245,
+  "torque_nm": 540,
+  "displacement_l": 3.0,
+  "aspiration": "turbocharged diesel",
+  "fuel": "diesel",
+  "source": "Public BMW N57 class specifications"
+}

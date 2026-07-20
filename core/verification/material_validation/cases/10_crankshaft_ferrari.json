@@ -1,0 +1,11 @@
+{
+  "component": "crankshaft",
+  "material": "Forged Steel 4340 class",
+  "yield_strength_mpa": 710,
+  "fatigue_strength_mpa": 350,
+  "temperature_limit_c": 400,
+  "application": "production_v12",
+  "engine": "Ferrari F140 class",
+  "source": "Public high-performance forged crank class",
+  "confidence": "low"
+}

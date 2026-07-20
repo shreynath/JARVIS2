@@ -3,17 +3,25 @@
 from __future__ import annotations
 
 import math
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 from core.epistemology import KnowledgeState
+from core.epistemology.assumption_registry import AssumptionRegistry
 from core.epistemology.input_requirement import (
     InputRequirement,
     InputState,
     MissingEngineeringInputError,
 )
+from core.engineering.connecting_rod_model import ConnectingRodModel, RodSectionType
+from core.engineering.engine_cycle_model import EngineCycleModel
+from core.engineering.geometry_model import GeometryModel
+from core.engineering.reciprocating_mass import ReciprocatingMassModel
+from core.engineering.thermal_model import ThermalModel
 from core.ir.constraint import Constraint, ConstraintPriority, ConstraintSeverity
 from core.ir.requirement_spec import RequirementSpecification
+from core.verification.model_registry import maturity_for_calc
 from knowledge.equations.catalog import provenance_for_calc
 
 HP_TO_KW = 0.745699872
@@ -55,6 +63,8 @@ class PhysicsCalculation(BaseModel):
     equation_source: str | None = None
     engineering_reference: dict | None = None
     validation_status: str | None = None
+    # Phase 4.5 — model sophistication (orthogonal to confidence / validation_status).
+    model_maturity: str | None = None
 
 
 def _attach_provenance(calc_id: str, kwargs: dict) -> dict:
@@ -64,6 +74,9 @@ def _attach_provenance(calc_id: str, kwargs: dict) -> dict:
     kwargs.setdefault("equation_source", prov.get("equation_source"))
     kwargs.setdefault("engineering_reference", prov.get("engineering_reference"))
     kwargs.setdefault("validation_status", prov.get("validation_status"))
+    maturity = maturity_for_calc(calc_id)
+    if maturity is not None:
+        kwargs.setdefault("model_maturity", maturity.name)
     return kwargs
 
 
@@ -85,6 +98,8 @@ class PhysicsAnalysis(BaseModel):
     # operating_conditions is ALWAYS derived from these refs — never independently populated.
     operating_condition_refs: dict[str, str] = Field(default_factory=dict)
     operating_condition_modes: dict[str, str] = Field(default_factory=dict)  # result | high | low
+    # Phase 5.0 — isolated engineering-model attachments (provenance only; not operating inputs).
+    engineering_attachments: dict[str, Any] = Field(default_factory=dict)
 
     def by_id(self, calculation_id: str) -> PhysicsCalculation | None:
         return next((c for c in self.calculations if c.id == calculation_id), None)
@@ -207,7 +222,20 @@ class PhysicsEngine:
         )
         if displacement_range:
             displacement_depends_on_power = bool(target_hp and max_rpm and aspiration) or bool(displacement_l)
+            cycle = (
+                EngineCycleModel().estimate(
+                    aspiration=aspiration,
+                    horsepower=target_hp,
+                    rpm=max_rpm,
+                    displacement_l=displacement_l,
+                )
+                if aspiration
+                else None
+            )
+            if cycle is not None:
+                analysis.engineering_attachments["engine_cycle"] = cycle.to_dict()
             bmep = self._bmep_range(aspiration) if aspiration else (0.0, 0.0)
+            cycle_assumptions = list(cycle.assumptions) if cycle is not None else []
             analysis.calculations.append(
                 make_physics_calculation(
                     id="calc_displacement",
@@ -223,13 +251,19 @@ class PhysicsEngine:
                         "bmep_low_pa": bmep[0],
                         "bmep_high_pa": bmep[1],
                         "cylinder_count": cylinder_count or 0.0,
+                        "cycle_model": "EngineCycleModel",
+                        "bmep_source": (
+                            None
+                            if cycle is None or cycle.bmep is None
+                            else cycle.bmep.source
+                        ),
                     },
                     result=round(sum(displacement_range) / 2, 2),
                     value_range=(round(displacement_range[0], 2), round(displacement_range[1], 2)),
                     unit="L",
                     method=(
-                        "Used four-stroke BMEP power relation. If displacement was provided, "
-                        "the range collapses to that known input."
+                        "Used four-stroke BMEP power relation via EngineCycleModel empirical bands. "
+                        "If displacement was provided, the range collapses to that known input."
                         if displacement_depends_on_power
                         else "Used cylinder count with a representative per-cylinder displacement range so RPM-only physics can proceed."
                     ),
@@ -237,9 +271,15 @@ class PhysicsEngine:
                         []
                         if displacement_l
                         else (
-                            [f"BMEP range inferred from aspiration type: {aspiration}"]
-                            if target_hp and max_rpm and aspiration
-                            else ["Displacement not provided; estimated from cylinder count and representative per-cylinder displacement range."]
+                            cycle_assumptions
+                            or (
+                                [f"BMEP range inferred from aspiration type: {aspiration}"]
+                                if target_hp and max_rpm and aspiration
+                                else [
+                                    "Displacement not provided; estimated from cylinder count "
+                                    "and representative per-cylinder displacement range."
+                                ]
+                            )
                         )
                     ),
                     dependency_ids=["calc_torque"] if target_hp and max_rpm else [],
@@ -386,36 +426,46 @@ class PhysicsEngine:
             )
 
         if acceleration_range and stroke_range and displacement_range and cylinder_count and aspiration:
-            force_range, stress_range = self._reciprocating_load_ranges(
+            force_range, stress_range, rod_meta = self._reciprocating_load_ranges(
                 displacement_range,
                 stroke_range,
                 cylinder_count,
                 acceleration_range,
                 aspiration,
             )
+            analysis.engineering_attachments["reciprocating_mass"] = rod_meta.get("mass_samples", [])
+            analysis.engineering_attachments["connecting_rod"] = rod_meta.get("rod_samples", [])
+            analysis.engineering_attachments["geometry"] = rod_meta.get("geometry_samples", [])
+            analysis.engineering_attachments["assumption_records"] = rod_meta.get("assumptions", [])
             analysis.calculations.append(
                 make_physics_calculation(
                     id="calc_rod_loading",
                     name="Connecting rod loading estimate",
-                    formula="rod_load = piston_mass * acceleration + peak_pressure * bore_area",
+                    formula="rod_load = reciprocating_mass * acceleration + peak_pressure * bore_area",
                     inputs={
                         "cylinder_count": cylinder_count,
                         "acceleration_low_m_s2": acceleration_range[0],
                         "acceleration_high_m_s2": acceleration_range[1],
                         "peak_pressure_factor_low": PEAK_PRESSURE_TO_BMEP_RANGE[0],
                         "peak_pressure_factor_high": PEAK_PRESSURE_TO_BMEP_RANGE[1],
+                        "mass_model": "ReciprocatingMassModel",
+                        "reciprocating_mass_kg_mid": rod_meta.get("mass_mid"),
                     },
                     result=round(sum(force_range) / 2, 0),
                     value_range=(round(force_range[0], 0), round(force_range[1], 0)),
                     unit="N",
-                    method="Combined inertial tensile load with pressure-driven compressive load order of magnitude.",
-                    assumptions=[
-                        "Piston mass estimated from displacement per cylinder.",
+                    method=(
+                        "Combined inertial tensile load with pressure-driven compressive load; "
+                        "reciprocating mass from GeometryModel + ReciprocatingMassModel."
+                    ),
+                    assumptions=rod_meta.get("assumption_strings", [])
+                    or [
+                        "Reciprocating mass from geometry/density shell model.",
                         "Peak cylinder pressure estimated from BMEP multiplier.",
                     ],
                     dependency_ids=["calc_piston_acceleration", "calc_displacement"],
                     knowledge_state=KnowledgeState.ASSUMED,
-                    confidence="low",
+                    confidence="medium",
                     assessment="Load range supports fatigue and material requirement generation.",
                     passes=True,
                 )
@@ -424,21 +474,30 @@ class PhysicsEngine:
                 make_physics_calculation(
                     id="calc_rod_stress_requirement",
                     name="Rod stress requirement estimate",
-                    formula="stress = rod_load / effective_section_area",
+                    formula="stress = rod_load / section_area (I/H-beam); buckling via Euler",
                     inputs={
                         "load_low_n": force_range[0],
                         "load_high_n": force_range[1],
-                        "area_low_m2": ROD_SECTION_AREA_M2_RANGE[0],
-                        "area_high_m2": ROD_SECTION_AREA_M2_RANGE[1],
+                        "rod_model": "ConnectingRodModel",
+                        "section_type": "i_beam",
+                        "tensile_stress_mpa_mid": rod_meta.get("stress_mid"),
+                        "buckling_margin_min": rod_meta.get("buckling_margin_min"),
+                        "fatigue_margin_min": rod_meta.get("fatigue_margin_min"),
                     },
                     result=round(sum(stress_range) / 2, 1),
                     value_range=(round(stress_range[0], 1), round(stress_range[1], 1)),
                     unit="MPa",
-                    method="Estimated required stress capacity from load range and plausible rod section area.",
-                    assumptions=["Rod section geometry is unknown; stress is a requirement range, not FEA output."],
+                    method=(
+                        "Geometry-aware I-beam connecting-rod section with Euler buckling and "
+                        "endurance-style fatigue margin (ConnectingRodModel)."
+                    ),
+                    assumptions=rod_meta.get("rod_assumption_strings", [])
+                    or [
+                        "Rod section dimensions scaled from bore via explicit heuristics — not FEA."
+                    ],
                     dependency_ids=["calc_rod_loading"],
                     knowledge_state=KnowledgeState.ASSUMED,
-                    confidence="low",
+                    confidence="medium",
                     assessment="Material must provide yield and fatigue margin above the upper stress estimate.",
                     passes=True,
                 )
@@ -496,7 +555,11 @@ class PhysicsEngine:
             )
 
         if target_hp:
-            thermal_range = self._cooling_heat_rejection_range(target_hp)
+            thermal = ThermalModel().analyze(horsepower=target_hp)
+            analysis.engineering_attachments["thermal"] = thermal.to_dict()
+            heat_q = thermal.heat_rejection_kw
+            assert heat_q is not None and isinstance(heat_q.value, tuple)
+            thermal_range = heat_q.value
             analysis.calculations.append(
                 make_physics_calculation(
                     id="calc_heat_rejection",
@@ -508,49 +571,59 @@ class PhysicsEngine:
                         "brake_thermal_efficiency_high": BRAKE_THERMAL_EFFICIENCY_RANGE[1],
                         "coolant_heat_fraction_low": COOLANT_HEAT_FRACTION_RANGE[0],
                         "coolant_heat_fraction_high": COOLANT_HEAT_FRACTION_RANGE[1],
+                        "thermal_model": "ThermalModel",
+                        "thermal_kind": heat_q.kind,
+                        "validation_status_model": heat_q.validation_status,
                     },
                     result=round(sum(thermal_range) / 2, 1),
                     value_range=(round(thermal_range[0], 1), round(thermal_range[1], 1)),
                     unit="kW",
-                    method="Order-of-magnitude coolant heat rejection from brake power and efficiency range.",
-                    assumptions=["Brake thermal efficiency and coolant heat split are assumed ranges."],
+                    method=(
+                        "Calculated coolant heat rejection via ThermalModel energy-split "
+                        f"(maturity {heat_q.maturity})."
+                    ),
+                    assumptions=list(heat_q.assumptions),
                     dependency_ids=["calc_torque"] if max_rpm else [],
                     knowledge_state=KnowledgeState.ASSUMED,
-                    confidence="medium",
+                    confidence=heat_q.confidence,
                     assessment="Cooling system must reject this heat range at the design duty cycle.",
                     passes=True,
                 )
             )
             analysis.bind_operating("cooling_heat_rejection_kw", "calc_heat_rejection", use_high=True)
-        else:
-            self._add_skipped(
-                analysis,
-                calculation_id="calc_heat_rejection",
-                name="Cooling heat rejection estimate",
-                formula="cooling_heat = brake_power / thermal_efficiency * coolant_heat_fraction",
-                missing_inputs=["target_horsepower"],
-                reason="Cooling heat rejection requires resolved brake power.",
-            )
 
-        required_temp = self._estimate_component_temperature(analysis, target_hp)
-        if required_temp is not None:
-            # Derived from calc_heat_rejection; store under operating_conditions but
-            # link via a dedicated synthetic calc so consumers can reference by ID.
+            # Temperature uses upper heat bound (historical PE operating-condition binding).
+            heat_high = float(max(thermal_range))
+            thermal_temp = ThermalModel().analyze(
+                horsepower=target_hp, cooling_heat_kw_for_temp=heat_high
+            )
+            analysis.engineering_attachments["thermal"] = thermal_temp.to_dict()
+            temp_q = thermal_temp.combustion_side_temperature_c
+            assert temp_q is not None
+            required_temp = float(temp_q.value)  # type: ignore[arg-type]
             heat_calc = analysis.by_id("calc_heat_rejection")
             analysis.calculations.append(
                 make_physics_calculation(
                     id="calc_combustion_side_temperature",
                     name="Combustion-side temperature estimate",
                     formula="T ≈ 180 + min(120, cooling_heat_kw / 8)",
-                    inputs={"cooling_heat_rejection_kw": analysis.resolve_operating("cooling_heat_rejection_kw") or 0},
+                    inputs={
+                        "cooling_heat_rejection_kw": heat_high,
+                        "thermal_model": "ThermalModel",
+                        "thermal_kind": temp_q.kind,
+                        "validation_status_model": temp_q.validation_status,
+                    },
                     result=required_temp,
                     value_range=(required_temp, required_temp),
                     unit="C",
-                    method="Order-of-magnitude combustion-side temperature from coolant heat rejection.",
-                    assumptions=["Empirical mapping from heat rejection; not a CFD result."],
+                    method=(
+                        f"Empirical combustion-side temperature via ThermalModel "
+                        f"(maturity {temp_q.maturity}, {temp_q.kind})."
+                    ),
+                    assumptions=list(temp_q.assumptions),
                     dependency_ids=["calc_heat_rejection"] if heat_calc else [],
                     knowledge_state=KnowledgeState.ASSUMED,
-                    confidence="low",
+                    confidence=temp_q.confidence,
                     assessment="Used for material temperature-limit requirements on combustion-exposed parts.",
                     passes=True,
                 )
@@ -571,6 +644,15 @@ class PhysicsEngine:
                         source="physics_engine",
                     )
                 )
+        else:
+            self._add_skipped(
+                analysis,
+                calculation_id="calc_heat_rejection",
+                name="Cooling heat rejection estimate",
+                formula="cooling_heat = brake_power / thermal_efficiency * coolant_heat_fraction",
+                missing_inputs=["target_horsepower"],
+                reason="Cooling heat rejection requires resolved brake power.",
+            )
 
         return analysis
 
@@ -636,10 +718,8 @@ class PhysicsEngine:
 
     @staticmethod
     def _bmep_range(aspiration: str) -> tuple[float, float]:
-        lower = aspiration.lower()
-        if "turbo" in lower or "super" in lower:
-            return BOOSTED_BMEP_RANGE_PA
-        return NA_BMEP_RANGE_PA
+        """BMEP Pa band from EngineCycleModel (endpoints identical to legacy constants)."""
+        return EngineCycleModel().bmep_range_pa(aspiration)
 
     def _displacement_range(
         self,
@@ -700,27 +780,94 @@ class PhysicsEngine:
         cylinder_count: float,
         acceleration_range_m_s2: tuple[float, float],
         aspiration: str,
-    ) -> tuple[tuple[float, float], tuple[float, float]]:
+    ) -> tuple[tuple[float, float], tuple[float, float], dict[str, Any]]:
+        """Geometry-derived reciprocating mass + connecting-rod section stress."""
         forces: list[float] = []
         stresses_mpa: list[float] = []
+        buckling_margins: list[float] = []
+        fatigue_margins: list[float] = []
+        mass_samples: list[dict[str, Any]] = []
+        rod_samples: list[dict[str, Any]] = []
+        geometry_samples: list[dict[str, Any]] = []
+        assumption_reg = AssumptionRegistry()
+
+        mass_model = ReciprocatingMassModel()
+        rod_model = ConnectingRodModel()
+        geom_model = GeometryModel()
         bmep_low, bmep_high = self._bmep_range(aspiration)
+
+        # Corner sampling: keep enumeration bounded (endpoints only).
         for disp_l in displacement_range_l:
-            per_cylinder_l = disp_l / cylinder_count
             for stroke_mm in stroke_range_mm:
                 stroke_m = stroke_mm / 1000.0
+                per_cylinder_l = disp_l / cylinder_count
                 bore_area_m2 = (per_cylinder_l / 1000.0) / stroke_m
+
+                geom = geom_model.resolve(
+                    displacement_l=disp_l,
+                    cylinder_count=cylinder_count,
+                    stroke_mm=stroke_mm,
+                    registry=AssumptionRegistry(),
+                )
+                assumption_reg.extend(geom.registry or AssumptionRegistry())
+                geometry_samples.append(geom.to_dict())
+                if geom.bore_mm is None:
+                    # Analytical fallback identical to bore_area identity.
+                    bore_mm = (4.0 * bore_area_m2 / math.pi) ** 0.5 * 1000.0
+                else:
+                    bore_mm = geom.bore_mm.value
+
+                mass_reg = AssumptionRegistry()
+                mass_est = mass_model.estimate(
+                    bore_mm=bore_mm,
+                    stroke_mm=stroke_mm,
+                    registry=mass_reg,
+                )
+                assumption_reg.extend(mass_reg)
+                mass_samples.append(mass_est.to_dict())
+                recip_mass = mass_est.reciprocating_mass_kg
+
                 for acceleration in acceleration_range_m_s2:
-                    for mass_factor in PISTON_MASS_PER_DISPLACEMENT_KG_PER_L:
-                        piston_mass = max(0.2, per_cylinder_l * mass_factor)
-                        inertial_force = piston_mass * acceleration
-                        for bmep in (bmep_low, bmep_high):
-                            for pressure_factor in PEAK_PRESSURE_TO_BMEP_RANGE:
-                                gas_force = bmep * pressure_factor * bore_area_m2
-                                load = inertial_force + gas_force
-                                forces.append(load)
-                                for area in ROD_SECTION_AREA_M2_RANGE:
-                                    stresses_mpa.append(load / area / 1e6)
-        return (min(forces), max(forces)), (min(stresses_mpa), max(stresses_mpa))
+                    inertial_force = recip_mass * acceleration
+                    for bmep in (bmep_low, bmep_high):
+                        for pressure_factor in PEAK_PRESSURE_TO_BMEP_RANGE:
+                            gas_force = bmep * pressure_factor * bore_area_m2
+                            load = inertial_force + gas_force
+                            forces.append(load)
+
+                            rod_reg = AssumptionRegistry()
+                            rod = rod_model.analyze(
+                                bore_mm=bore_mm,
+                                stroke_mm=stroke_mm,
+                                tensile_load_n=load,
+                                compressive_load_n=max(gas_force, load * 0.5),
+                                section_type=RodSectionType.I_BEAM,
+                                registry=rod_reg,
+                            )
+                            assumption_reg.extend(rod_reg)
+                            rod_samples.append(rod.to_dict())
+                            stresses_mpa.append(rod.maximum_tensile_stress_mpa)
+                            stresses_mpa.append(rod.compressive_stress_mpa)
+                            buckling_margins.append(rod.buckling_margin)
+                            fatigue_margins.append(rod.fatigue_margin)
+
+        meta: dict[str, Any] = {
+            "mass_samples": mass_samples[:4],
+            "rod_samples": rod_samples[:4],
+            "geometry_samples": geometry_samples[:4],
+            "assumptions": assumption_reg.as_dicts()[:40],
+            "assumption_strings": assumption_reg.as_strings()[:20],
+            "rod_assumption_strings": [
+                a for a in assumption_reg.as_strings() if a.startswith("rod_") or "rod_" in a
+            ][:12],
+            "mass_mid": round(sum(m["reciprocating_mass_kg"] for m in mass_samples) / max(len(mass_samples), 1), 4)
+            if mass_samples
+            else None,
+            "stress_mid": round(sum(stresses_mpa) / max(len(stresses_mpa), 1), 2) if stresses_mpa else None,
+            "buckling_margin_min": round(min(buckling_margins), 3) if buckling_margins else None,
+            "fatigue_margin_min": round(min(fatigue_margins), 3) if fatigue_margins else None,
+        }
+        return (min(forces), max(forces)), (min(stresses_mpa), max(stresses_mpa)), meta
 
     @staticmethod
     def _cooling_heat_rejection_range(target_hp: float) -> tuple[float, float]:

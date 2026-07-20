@@ -1,0 +1,13 @@
+{
+  "engine": "Mercedes-Benz M120",
+  "engine_id": "mercedes_m120",
+  "architecture": "V12",
+  "rpm": 5800,
+  "hp": 402,
+  "torque_nm": 580,
+  "displacement_l": 6.0,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Mercedes-Benz S 600 / SL 600 published specifications",
+  "family": "naturally_aspirated"
+}

@@ -1,0 +1,36 @@
+{
+  "phase": "8.5",
+  "policy": "Explicit promotions only. Campaign evaluators never write this file.",
+  "promotions": {
+    "calc_torque": {
+      "from": "M2",
+      "to": "M3",
+      "campaign": "high_rpm_dynamics",
+      "promoted_at": "2026-07-20T01:32:46.644143+00:00",
+      "campaign_result": "/Users/shreyaannath/Programming/JARVIS2/output/campaign_result.json",
+      "known_limitations": "Campaign A (high_rpm_dynamics) M3: Does not model friction or accessory loads.; SI torque at redline is not published peak torque.",
+      "independently_verified": true,
+      "benchmarked": true
+    },
+    "calc_mean_piston_speed": {
+      "from": "M2",
+      "to": "M3",
+      "campaign": "high_rpm_dynamics",
+      "promoted_at": "2026-07-20T01:32:46.680062+00:00",
+      "campaign_result": "/Users/shreyaannath/Programming/JARVIS2/output/campaign_result.json",
+      "known_limitations": "Campaign A (high_rpm_dynamics) M3: Kinematic definition only.; Hard limit 26 m/s is an engineering standard, not a physics law.",
+      "independently_verified": true,
+      "benchmarked": true
+    },
+    "calc_piston_acceleration": {
+      "from": "M2",
+      "to": "M3",
+      "campaign": "high_rpm_dynamics",
+      "promoted_at": "2026-07-20T01:32:46.716122+00:00",
+      "campaign_result": "/Users/shreyaannath/Programming/JARVIS2/output/campaign_result.json",
+      "known_limitations": "Campaign A (high_rpm_dynamics) M3: No OEM published peak piston acceleration in campaign dataset (null).; First-harmonic approximation.",
+      "independently_verified": true,
+      "benchmarked": false
+    }
+  }
+}

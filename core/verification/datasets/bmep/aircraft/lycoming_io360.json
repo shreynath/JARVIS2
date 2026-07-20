@@ -1,0 +1,13 @@
+{
+  "engine": "Lycoming IO-360 class",
+  "engine_id": "lycoming_io360",
+  "architecture": "Boxer-4 / Flat-4",
+  "rpm": 2700,
+  "hp": 200,
+  "torque_nm": null,
+  "displacement_l": 5.9,
+  "aspiration": "Naturally aspirated",
+  "fuel": "aviation_gasoline",
+  "source": "Lycoming IO-360 published type figures (public aviation)",
+  "family": "aircraft"
+}

@@ -10,7 +10,11 @@ from typing import Any
 
 from knowledge.equations.catalog import EQUATION_CATALOG
 from knowledge.equations.hard_limits import HARD_LIMIT_CATALOG
+from core.verification.maturity_report import maturity_audit_slice
+from core.verification.model_registry import MODEL_REGISTRY, descriptor_for_calc
+from core.verification.model_maturity import ModelMaturity
 from verification.formula_validator import validate_physics_json
+from verification.impact_analysis import analyze_model_impact
 from verification.units import run_units_audit
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -55,11 +59,15 @@ def explainability_from_outputs(physics: dict | None, req: dict | None, graph: d
     for c in (physics or {}).get("calculations") or []:
         if c.get("status") != "computed":
             continue
+        desc = descriptor_for_calc(c.get("id") or "")
         traces.append(
             {
                 "calc_id": c["id"],
                 "equation_id": c.get("equation_id"),
                 "validation_status": c.get("validation_status"),
+                "model_maturity": c.get("model_maturity")
+                or (desc.maturity.name if desc else None),
+                "confidence": c.get("confidence"),
                 "dependencies": c.get("dependency_ids"),
                 "assumptions": c.get("assumptions"),
                 "inputs_overlap_requirements": sorted(
@@ -291,6 +299,117 @@ def score_subsystems(parts: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def phase6_scientific_summary(output_dir: Path) -> dict[str, Any]:
+    """Assemble external calibration status from previously written Phase 6 artifacts.
+
+    Does not import PhysicsEngine or run JARVIS. Missing reports → honest UNKNOWN.
+    """
+    calibration = _load(output_dir / "calibration_report.json")
+    errors = _load(output_dir / "model_error_report.json")
+    risks = _load(output_dir / "failure_prediction_report.json")
+    matrix = _load(output_dir / "model_validation_matrix.json") or _load(
+        output_dir / "validation_matrix.json"
+    )
+
+    validated_models = []
+    for mid, desc in MODEL_REGISTRY.items():
+        if desc.benchmarked and desc.independently_verified:
+            validated_models.append(
+                {
+                    "model": mid,
+                    "maturity": desc.maturity.name,
+                    "benchmarked": True,
+                    "independently_verified": True,
+                }
+            )
+
+    unvalidated_high_impact = []
+    for mid, desc in MODEL_REGISTRY.items():
+        if desc.impact_level.value in {"high", "critical"} and not desc.benchmarked:
+            unvalidated_high_impact.append(
+                {
+                    "model": mid,
+                    "maturity": desc.maturity.name,
+                    "impact": desc.impact_level.value,
+                    "benchmarked": desc.benchmarked,
+                    "independently_verified": desc.independently_verified,
+                }
+            )
+
+    known_biases = []
+    for side_key in ("independent_verification_model", "jarvis_open_loop"):
+        block = (errors or {}).get(side_key) or {}
+        for quantity, meta in (block.get("quantities") or {}).items():
+            if meta.get("bias") in {"+", "-"}:
+                known_biases.append(
+                    {
+                        "source": side_key,
+                        "quantity": quantity,
+                        "bias": meta.get("bias"),
+                        "mean_signed_relative_error": meta.get("mean_signed_relative_error"),
+                        "interpretation": meta.get("interpretation"),
+                    }
+                )
+
+    recommended = [
+        r
+        for r in (risks or {}).get("highest_risk_models") or []
+    ][:8]
+
+    # Scientific confidence: evidence-only score 0–10 (not subjective “probably accurate”).
+    scientific_confidence = 3.0
+    if calibration:
+        scientific_confidence += 1.5
+        case_n = calibration.get("external_case_count") or 0
+        scientific_confidence += min(2.0, case_n / 20.0 * 2.0)
+    ind = ((errors or {}).get("independent_verification_model") or {}).get("quantities") or {}
+    if ind:
+        rates = [q.get("pass_rate") for q in ind.values() if q.get("pass_rate") is not None]
+        if rates:
+            scientific_confidence += 2.0 * (sum(rates) / len(rates))
+    scientific_confidence += 0.5 * len(validated_models)
+    scientific_confidence = round(max(0.0, min(10.0, scientific_confidence)), 2)
+
+    strongest = sorted(
+        [d for d in MODEL_REGISTRY.values() if d.benchmarked],
+        key=lambda d: d.maturity.name,
+    )
+    weakest = sorted(
+        [
+            d
+            for d in MODEL_REGISTRY.values()
+            if d.maturity in {ModelMaturity.M0, ModelMaturity.M1}
+            or (d.impact_level.value in {"high", "critical"} and not d.benchmarked)
+        ],
+        key=lambda d: d.id,
+    )
+
+    return {
+        "external_calibration_status": "present" if calibration else "UNKNOWN",
+        "external_case_count": (calibration or {}).get("external_case_count"),
+        "error_distributions": errors,
+        "validation_coverage": {
+            "matrix_case_count": (matrix or {}).get("case_count"),
+            "validated_model_count": len(validated_models),
+            "registry_size": len(MODEL_REGISTRY),
+        },
+        "weakest_models": [
+            {"model": d.id, "maturity": d.maturity.name, "impact": d.impact_level.value}
+            for d in weakest[:10]
+        ],
+        "strongest_models": [
+            {"model": d.id, "maturity": d.maturity.name, "impact": d.impact_level.value}
+            for d in strongest[:10]
+        ],
+        "scientific_confidence": scientific_confidence,
+        "validated_models": validated_models,
+        "unvalidated_high_impact_models": unvalidated_high_impact,
+        "known_biases": known_biases,
+        "recommended_research": recommended,
+        "failure_prediction": risks,
+    }
+
+
 def run_reality_audit(output_dir: Path | str = "output") -> dict[str, Any]:
     out = Path(output_dir)
     if not out.is_absolute():
@@ -330,6 +449,7 @@ def run_reality_audit(output_dir: Path | str = "output") -> dict[str, Any]:
     for calc in (physics or {}).get("calculations") or []:
         eq_id = calc.get("equation_id")
         cat = EQUATION_CATALOG.get(eq_id or "", {})
+        desc = descriptor_for_calc(calc.get("id") or "")
         formula_refs.append(
             {
                 "calc_id": calc.get("id"),
@@ -338,6 +458,9 @@ def run_reality_audit(output_dir: Path | str = "output") -> dict[str, Any]:
                 "equation_source": calc.get("equation_source"),
                 "engineering_reference": calc.get("engineering_reference"),
                 "validation_status": calc.get("validation_status") or cat.get("validation_status"),
+                "confidence": calc.get("confidence"),
+                "model_maturity": calc.get("model_maturity")
+                or (desc.maturity.name if desc else None),
                 "independently_verified_this_run": any(
                     r.get("status") == "pass"
                     for r in formula_validation.get("records", [])
@@ -346,6 +469,10 @@ def run_reality_audit(output_dir: Path | str = "output") -> dict[str, Any]:
                 ),
             }
         )
+
+    maturity = maturity_audit_slice()
+    impact = analyze_model_impact(physics)
+    phase6 = phase6_scientific_summary(out)
 
     parts = {
         "formula_validation": formula_validation,
@@ -375,4 +502,36 @@ def run_reality_audit(output_dir: Path | str = "output") -> dict[str, Any]:
         "scientific_score": scores["scientific_score"],
         "engineering_score": scores["engineering_score"],
         "software_architecture_score": scores["software_architecture_score"],
+        # Phase 4.5 — maturity is reported independently of confidence.
+        "engineering_confidence": scores["overall_confidence"],
+        "engineering_evidence": {
+            "formula_passed": formula_validation.get("passed"),
+            "units_passed": unit_analysis.get("passed"),
+            "gap_count": gaps.get("gap_count"),
+            "registry_size": len(MODEL_REGISTRY),
+        },
+        "model_maturity": maturity,
+        "average_maturity": maturity.get("average_maturity"),
+        "average_maturity_rank": maturity.get("average_maturity_rank"),
+        "maturity_distribution": maturity.get("maturity_distribution"),
+        "subsystem_maturity": maturity.get("subsystem_maturity"),
+        "weakest_maturity": maturity.get("weakest_maturity"),
+        "strongest_maturity": maturity.get("strongest_maturity"),
+        "model_impact": impact,
+        "impact_ranking": impact.get("impact_ranking"),
+        # Phase 6.0 — external calibration (loaded from artifacts; never self-validates).
+        "external_calibration_status": phase6.get("external_calibration_status"),
+        "error_distributions": phase6.get("error_distributions"),
+        "validation_coverage": phase6.get("validation_coverage"),
+        "weakest_models": phase6.get("weakest_models"),
+        "strongest_models": phase6.get("strongest_models"),
+        "scientific_confidence": phase6.get("scientific_confidence"),
+        "validated_models": phase6.get("validated_models"),
+        "unvalidated_high_impact_models": phase6.get("unvalidated_high_impact_models"),
+        "known_biases": phase6.get("known_biases"),
+        "recommended_research": phase6.get("recommended_research"),
+        "phase6": phase6,
+        "model_closure": _load(out / "model_closure_report.json"),
+        "bmep_validation_present": (out / "bmep_validation.json").exists(),
+        "uncertainty_propagation_present": (out / "uncertainty_propagation.json").exists(),
     }

@@ -1,0 +1,28 @@
+{
+  "id": "porsche_mezger_gt1",
+  "name": "Porsche Mezger GT1-derived",
+  "manufacturer": "Porsche",
+  "year": 2000,
+  "architecture": "Flat-6",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Porsche 911 GT3 996 Mezger published specifications"
+  ],
+  "published": {
+    "horsepower": 360,
+    "max_rpm": 7800,
+    "displacement_l": 3.6,
+    "bore_mm": 100.0,
+    "stroke_mm": 76.4,
+    "cylinder_count": 6,
+    "torque_nm": 370,
+    "published_source": "Porsche 996 GT3 Mezger OEM",
+    "compression_ratio": null,
+    "mass_kg": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 19.86,
+    "note": "2 * 0.0764 * 7800 / 60"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

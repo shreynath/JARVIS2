@@ -1,0 +1,13 @@
+{
+  "family": "diesel",
+  "engine_id": "vw_ea189_2_0_tdi",
+  "engine": "VW EA189 2.0 TDI class",
+  "architecture": "Inline-4",
+  "rpm": 4200,
+  "hp": 140,
+  "torque_nm": 320,
+  "displacement_l": 2.0,
+  "aspiration": "turbocharged diesel",
+  "fuel": "diesel",
+  "source": "Public VW 2.0 TDI class specifications"
+}

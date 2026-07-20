@@ -1,0 +1,11 @@
+{
+  "component": "connecting_rod",
+  "material": "Titanium 6Al-4V class",
+  "yield_strength_mpa": 880,
+  "fatigue_strength_mpa": 510,
+  "temperature_limit_c": 400,
+  "application": "high_rpm_gasoline",
+  "engine": "Chevrolet LS7 published titanium rods",
+  "source": "GM LS7 public titanium connecting-rod specification",
+  "confidence": "high"
+}

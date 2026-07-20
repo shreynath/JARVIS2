@@ -1,0 +1,28 @@
+{
+  "id": "ferrari_f136",
+  "name": "Ferrari F136",
+  "architecture": "V8",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Ferrari F430 published OEM specifications (public)"
+  ],
+  "published": {
+    "horsepower": 490,
+    "max_rpm": 8500,
+    "displacement_l": 4.308,
+    "bore_mm": 92.0,
+    "stroke_mm": 81.0,
+    "cylinder_count": 8,
+    "torque_nm": 465,
+    "compression_ratio": null,
+    "mean_piston_speed_m_s": null,
+    "peak_piston_acceleration_m_s2": null,
+    "mass_kg": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 22.95,
+    "note": "2 * 0.081 * 8500 / 60"
+  },
+  "data_quality": "manufacturer",
+  "campaign": "high_rpm_dynamics"
+}

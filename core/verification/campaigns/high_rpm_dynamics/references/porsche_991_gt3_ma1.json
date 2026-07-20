@@ -1,0 +1,28 @@
+{
+  "id": "porsche_991_gt3_ma1",
+  "name": "Porsche 991.1 GT3 MA1",
+  "architecture": "Flat-6",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Porsche 991 GT3 published OEM specifications (MA1.74 family)"
+  ],
+  "published": {
+    "horsepower": 475,
+    "max_rpm": 9000,
+    "displacement_l": 3.799,
+    "bore_mm": 102.0,
+    "stroke_mm": 77.5,
+    "cylinder_count": 6,
+    "torque_nm": 440,
+    "compression_ratio": 12.9,
+    "mean_piston_speed_m_s": null,
+    "peak_piston_acceleration_m_s2": null,
+    "mass_kg": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 23.25,
+    "note": "2 * 0.0775 * 9000 / 60"
+  },
+  "data_quality": "manufacturer",
+  "campaign": "high_rpm_dynamics"
+}

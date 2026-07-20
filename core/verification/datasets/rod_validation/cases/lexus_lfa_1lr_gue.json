@@ -1,0 +1,21 @@
+{
+  "engine_id": "lexus_lfa_1lr_gue",
+  "engine_name": "Lexus LFA 1LR-GUE",
+  "rpm": 9000,
+  "stroke_mm": 79.0,
+  "rod_length_mm": null,
+  "piston_mass_g": null,
+  "rod_mass_g": null,
+  "bore_mm": 88.0,
+  "reported_component_data": {
+    "connecting_rods_material": null,
+    "pistons_material": null,
+    "displacement_l": 4.805,
+    "cylinder_count": 10,
+    "aspiration": "Naturally aspirated",
+    "architecture": "V10"
+  },
+  "source": "Lexus LFA published OEM specifications",
+  "confidence": "missing_masses",
+  "notes": "OEM geometry/RPM published; absolute piston/rod mass and rod length not in public dataset \u2014 left null (no invention)."
+}

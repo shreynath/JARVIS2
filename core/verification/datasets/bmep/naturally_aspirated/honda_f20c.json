@@ -1,0 +1,13 @@
+{
+  "engine": "Honda F20C",
+  "engine_id": "honda_f20c",
+  "architecture": "Inline-4",
+  "rpm": 9000,
+  "hp": 240,
+  "torque_nm": null,
+  "displacement_l": 1.997,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Honda S2000 published specifications (public OEM figures)",
+  "family": "naturally_aspirated"
+}

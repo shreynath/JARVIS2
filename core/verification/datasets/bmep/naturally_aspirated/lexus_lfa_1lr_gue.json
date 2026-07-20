@@ -1,0 +1,13 @@
+{
+  "engine": "Lexus LFA 1LR-GUE",
+  "engine_id": "lexus_lfa_1lr_gue",
+  "architecture": "V10",
+  "rpm": 9000,
+  "hp": 552,
+  "torque_nm": 480,
+  "displacement_l": 4.805,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Lexus LFA published OEM specifications",
+  "family": "naturally_aspirated"
+}

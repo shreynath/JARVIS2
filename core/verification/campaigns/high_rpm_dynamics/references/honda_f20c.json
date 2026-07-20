@@ -1,0 +1,29 @@
+{
+  "id": "honda_f20c",
+  "name": "Honda F20C",
+  "architecture": "Inline-4",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Honda S2000 published OEM specifications (public)",
+    "Honda factory literature — F20C displacement/bore/stroke/redline"
+  ],
+  "published": {
+    "horsepower": 240,
+    "max_rpm": 9000,
+    "displacement_l": 1.997,
+    "bore_mm": 87.0,
+    "stroke_mm": 84.0,
+    "cylinder_count": 4,
+    "torque_nm": null,
+    "compression_ratio": 11.7,
+    "mean_piston_speed_m_s": null,
+    "peak_piston_acceleration_m_s2": null,
+    "mass_kg": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 25.2,
+    "note": "2 * 0.084 * 9000 / 60 = 25.2 m/s (kinematic identity on published stroke/RPM)"
+  },
+  "data_quality": "manufacturer",
+  "campaign": "high_rpm_dynamics"
+}

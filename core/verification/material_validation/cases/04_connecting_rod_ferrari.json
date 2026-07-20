@@ -1,0 +1,11 @@
+{
+  "component": "connecting_rod",
+  "material": "Forged Steel / powered-metal class",
+  "yield_strength_mpa": null,
+  "fatigue_strength_mpa": null,
+  "temperature_limit_c": null,
+  "application": "production_v8",
+  "engine": "Ferrari F136 class",
+  "source": "Public production Ferrari V8; exact alloy unpublished \u2014 properties null",
+  "confidence": "low"
+}

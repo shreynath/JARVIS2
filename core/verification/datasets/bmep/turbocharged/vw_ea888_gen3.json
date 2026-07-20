@@ -1,0 +1,13 @@
+{
+  "family": "turbocharged",
+  "engine_id": "vw_ea888_gen3",
+  "engine": "VW EA888 Gen3 2.0T class",
+  "architecture": "Inline-4",
+  "rpm": 6200,
+  "hp": 228,
+  "torque_nm": 350,
+  "displacement_l": 2.0,
+  "aspiration": "turbocharged",
+  "fuel": "gasoline",
+  "source": "Public VW/Audi EA888 Gen3 class specs"
+}

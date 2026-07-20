@@ -1,0 +1,13 @@
+{
+  "family": "motorcycle",
+  "engine_id": "yamaha_r6",
+  "engine": "Yamaha YZF-R6 class",
+  "architecture": "Inline-4",
+  "rpm": 14500,
+  "hp": 116,
+  "torque_nm": 65,
+  "displacement_l": 0.599,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Public Yamaha R6 published specifications (class)"
+}

@@ -1,0 +1,28 @@
+{
+  "id": "nissan_vr38dett",
+  "name": "Nissan VR38DETT",
+  "manufacturer": "Nissan",
+  "year": 2007,
+  "architecture": "V6",
+  "aspiration": "Twin turbocharged",
+  "verified_sources": [
+    "Nissan GT-R R35 published specifications"
+  ],
+  "published": {
+    "horsepower": 480,
+    "max_rpm": 6800,
+    "displacement_l": 3.799,
+    "bore_mm": 95.5,
+    "stroke_mm": 88.4,
+    "cylinder_count": 6,
+    "torque_nm": 588,
+    "published_source": "Nissan VR38DETT OEM",
+    "compression_ratio": null,
+    "mass_kg": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 20.04,
+    "note": "2 * 0.0884 * 6800 / 60"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

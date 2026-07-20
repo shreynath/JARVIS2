@@ -1,0 +1,13 @@
+{
+  "family": "turbocharged",
+  "engine_id": "mitsubishi_4g63t",
+  "engine": "Mitsubishi 4G63T class",
+  "architecture": "Inline-4",
+  "rpm": 6500,
+  "hp": 276,
+  "torque_nm": 373,
+  "displacement_l": 2.0,
+  "aspiration": "turbocharged",
+  "fuel": "gasoline",
+  "source": "Public Evo VIII/IX 4G63T class specs"
+}

@@ -1,0 +1,13 @@
+{
+  "engine": "Toyota 2JZ-GTE",
+  "engine_id": "toyota_2jz_gte",
+  "architecture": "Inline-6",
+  "rpm": 6800,
+  "hp": 320,
+  "torque_nm": 427,
+  "displacement_l": 2.997,
+  "aspiration": "Twin turbocharged",
+  "fuel": "gasoline",
+  "source": "Toyota Supra JZA80 published specifications",
+  "family": "turbocharged"
+}

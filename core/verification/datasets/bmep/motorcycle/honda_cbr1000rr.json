@@ -1,0 +1,13 @@
+{
+  "family": "motorcycle",
+  "engine_id": "honda_cbr1000rr",
+  "engine": "Honda CBR1000RR class",
+  "architecture": "Inline-4",
+  "rpm": 13000,
+  "hp": 189,
+  "torque_nm": 116,
+  "displacement_l": 0.999,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Public Honda CBR1000RR published specifications (class)"
+}

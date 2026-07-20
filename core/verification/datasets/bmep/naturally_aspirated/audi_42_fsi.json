@@ -1,0 +1,13 @@
+{
+  "engine": "Audi 4.2 FSI",
+  "engine_id": "audi_42_fsi",
+  "architecture": "V8",
+  "rpm": 7800,
+  "hp": 420,
+  "torque_nm": 430,
+  "displacement_l": 4.163,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Audi R8 / RS4 B7 published specifications",
+  "family": "naturally_aspirated"
+}

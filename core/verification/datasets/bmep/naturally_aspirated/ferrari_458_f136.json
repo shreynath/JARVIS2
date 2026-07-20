@@ -1,0 +1,13 @@
+{
+  "engine": "Ferrari 458 Italia (F136)",
+  "engine_id": "ferrari_458_f136",
+  "architecture": "V8",
+  "rpm": 9000,
+  "hp": 562,
+  "torque_nm": 540,
+  "displacement_l": 4.499,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Ferrari 458 Italia published OEM specifications",
+  "family": "naturally_aspirated"
+}

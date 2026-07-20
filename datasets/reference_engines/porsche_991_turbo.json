@@ -1,0 +1,29 @@
+{
+  "id": "porsche_991_turbo",
+  "name": "Porsche 991 Turbo",
+  "manufacturer": "Porsche",
+  "year": 2013,
+  "architecture": "Flat-6",
+  "aspiration": "Twin turbocharged",
+  "verified_sources": [
+    "Porsche 991 Turbo published OEM specifications"
+  ],
+  "published": {
+    "horsepower": 520,
+    "max_rpm": 6800,
+    "displacement_l": 3.8,
+    "bore_mm": 102.0,
+    "stroke_mm": 77.5,
+    "cylinder_count": 6,
+    "torque_nm": 660,
+    "compression_ratio": 9.8,
+    "mass_kg": null,
+    "published_source": "Porsche 991 Turbo OEM"
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 17.57,
+    "note": "2 * 0.0775 * 6800 / 60"
+  },
+  "data_quality": "published_oem_geometry_power",
+  "caveat": "991 Turbo is not a Mezger crankcase; labeled per OEM 991 Turbo published data (Phase 6 list item)."
+}

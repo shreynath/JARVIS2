@@ -1,0 +1,21 @@
+{
+  "engine_id": "porsche_911_gt3_992_approx",
+  "engine_name": "Porsche 911 GT3 (992) 4.0 flat-6 class",
+  "rpm": 9000,
+  "stroke_mm": 81.5,
+  "rod_length_mm": null,
+  "piston_mass_g": null,
+  "rod_mass_g": null,
+  "bore_mm": 102.0,
+  "reported_component_data": {
+    "connecting_rods_material": "unknown_public",
+    "pistons_material": "unknown_public",
+    "displacement_l": 3.996,
+    "cylinder_count": 6,
+    "aspiration": "Naturally aspirated",
+    "architecture": "Boxer-6 / Flat-6"
+  },
+  "source": "Porsche 992 GT3 public OEM specifications (class reference)",
+  "confidence": "missing_masses",
+  "notes": "OEM geometry/RPM published; absolute piston/rod mass and rod length not in public dataset \u2014 left null (no invention)."
+}

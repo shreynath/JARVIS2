@@ -1,0 +1,21 @@
+{
+  "engine_id": "porsche_mezger_gt1",
+  "engine_name": "Porsche Mezger GT1-derived",
+  "rpm": 7800,
+  "stroke_mm": 76.4,
+  "rod_length_mm": null,
+  "piston_mass_g": null,
+  "rod_mass_g": null,
+  "bore_mm": 100.0,
+  "reported_component_data": {
+    "connecting_rods_material": null,
+    "pistons_material": null,
+    "displacement_l": 3.6,
+    "cylinder_count": 6,
+    "aspiration": "Naturally aspirated",
+    "architecture": "Flat-6"
+  },
+  "source": "Porsche 911 GT3 996 Mezger published specifications",
+  "confidence": "missing_masses",
+  "notes": "OEM geometry/RPM published; absolute piston/rod mass and rod length not in public dataset \u2014 left null (no invention)."
+}

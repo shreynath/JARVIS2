@@ -1,0 +1,21 @@
+{
+  "engine_id": "ferrari_f140",
+  "engine_name": "Ferrari F140 B (approx. Enzo/FXX family class)",
+  "rpm": 8200,
+  "stroke_mm": 75.2,
+  "rod_length_mm": null,
+  "piston_mass_g": null,
+  "rod_mass_g": null,
+  "bore_mm": 92.0,
+  "reported_component_data": {
+    "connecting_rods_material": "unknown_public",
+    "pistons_material": "unknown_public",
+    "displacement_l": 6.0,
+    "cylinder_count": 12,
+    "aspiration": "Naturally aspirated",
+    "architecture": "V12"
+  },
+  "source": "Public Ferrari Enzo era F140 published figures (approximate class reference)",
+  "confidence": "missing_masses",
+  "notes": "OEM geometry/RPM published; absolute piston/rod mass and rod length not in public dataset \u2014 left null (no invention)."
+}

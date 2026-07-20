@@ -1,0 +1,11 @@
+{
+  "component": "crankshaft",
+  "material": "Forged Steel 4340 class",
+  "yield_strength_mpa": 710,
+  "fatigue_strength_mpa": 350,
+  "temperature_limit_c": 400,
+  "application": "high_rpm_gasoline",
+  "engine": "BMW S85 / S65 class",
+  "source": "Public high-RPM BMW V10/V8 forged crank practice",
+  "confidence": "medium"
+}

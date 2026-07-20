@@ -1,0 +1,21 @@
+{
+  "engine_id": "honda_f20c",
+  "engine_name": "Honda F20C",
+  "rpm": 9000,
+  "stroke_mm": 84.0,
+  "rod_length_mm": null,
+  "piston_mass_g": null,
+  "rod_mass_g": null,
+  "bore_mm": 87.0,
+  "reported_component_data": {
+    "connecting_rods_material": "unknown_public",
+    "pistons_material": "unknown_public",
+    "displacement_l": 1.997,
+    "cylinder_count": 4,
+    "aspiration": "Naturally aspirated",
+    "architecture": "Inline-4"
+  },
+  "source": "Honda S2000 published specifications (public OEM figures)",
+  "confidence": "missing_masses",
+  "notes": "OEM geometry/RPM published; absolute piston/rod mass and rod length not in public dataset \u2014 left null (no invention)."
+}

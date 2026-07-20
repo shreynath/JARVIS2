@@ -1,0 +1,28 @@
+{
+  "id": "ferrari_f154",
+  "name": "Ferrari F154",
+  "manufacturer": "Ferrari",
+  "year": 2013,
+  "architecture": "V8",
+  "aspiration": "Twin turbocharged",
+  "verified_sources": [
+    "Ferrari California T / 488 published specifications"
+  ],
+  "published": {
+    "horsepower": 560,
+    "max_rpm": 7500,
+    "displacement_l": 3.855,
+    "bore_mm": 86.5,
+    "stroke_mm": 82.0,
+    "cylinder_count": 8,
+    "torque_nm": 755,
+    "published_source": "Ferrari California T OEM",
+    "compression_ratio": null,
+    "mass_kg": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 20.5,
+    "note": "2 * 0.082 * 7500 / 60"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

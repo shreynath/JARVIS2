@@ -1,0 +1,13 @@
+{
+  "engine": "Porsche 991.1 GT3 MA1",
+  "engine_id": "porsche_991_gt3_ma1",
+  "architecture": "Flat-6",
+  "rpm": 9000,
+  "hp": 475,
+  "torque_nm": 440,
+  "displacement_l": 3.799,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Porsche 991 GT3 published OEM specifications (MA1.74 family)",
+  "family": "naturally_aspirated"
+}

@@ -1,0 +1,13 @@
+{
+  "family": "diesel",
+  "engine_id": "om642_3_0",
+  "engine": "Mercedes OM642 3.0 CDI class",
+  "architecture": "V6",
+  "rpm": 3800,
+  "hp": 224,
+  "torque_nm": 510,
+  "displacement_l": 3.0,
+  "aspiration": "turbocharged diesel",
+  "fuel": "diesel",
+  "source": "Public Mercedes OM642 class specifications"
+}

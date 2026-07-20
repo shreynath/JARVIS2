@@ -1,0 +1,28 @@
+{
+  "id": "toyota_2jz_gte",
+  "name": "Toyota 2JZ-GTE",
+  "manufacturer": "Toyota",
+  "year": 1991,
+  "architecture": "Inline-6",
+  "aspiration": "Twin turbocharged",
+  "verified_sources": [
+    "Toyota Supra JZA80 published specifications"
+  ],
+  "published": {
+    "horsepower": 320,
+    "max_rpm": 6800,
+    "displacement_l": 2.997,
+    "bore_mm": 86.0,
+    "stroke_mm": 86.0,
+    "cylinder_count": 6,
+    "torque_nm": 427,
+    "published_source": "Toyota 2JZ-GTE OEM (JDM)",
+    "compression_ratio": null,
+    "mass_kg": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 19.49,
+    "note": "2 * 0.086 * 6800 / 60"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

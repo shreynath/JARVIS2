@@ -1,0 +1,28 @@
+{
+  "id": "mercedes_m159",
+  "name": "Mercedes-Benz M159",
+  "manufacturer": "Mercedes-Benz / AMG",
+  "year": 2010,
+  "architecture": "V8",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Mercedes-Benz SLS AMG published OEM specifications"
+  ],
+  "published": {
+    "horsepower": 563,
+    "max_rpm": 7200,
+    "displacement_l": 6.208,
+    "bore_mm": 102.2,
+    "stroke_mm": 94.6,
+    "cylinder_count": 8,
+    "torque_nm": 650,
+    "compression_ratio": 11.3,
+    "mass_kg": null,
+    "published_source": "Mercedes-Benz M159 OEM"
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 22.7,
+    "note": "2 * 0.0946 * 7200 / 60"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

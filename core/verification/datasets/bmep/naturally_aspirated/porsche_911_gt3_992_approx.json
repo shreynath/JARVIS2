@@ -1,0 +1,13 @@
+{
+  "engine": "Porsche 911 GT3 (992) 4.0 flat-6 class",
+  "engine_id": "porsche_911_gt3_992_approx",
+  "architecture": "Boxer-6 / Flat-6",
+  "rpm": 9000,
+  "hp": 502,
+  "torque_nm": null,
+  "displacement_l": 3.996,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Porsche 992 GT3 public OEM specifications (class reference)",
+  "family": "naturally_aspirated"
+}

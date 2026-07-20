@@ -1,0 +1,13 @@
+{
+  "engine": "Cosworth DFV (historical F1 class)",
+  "engine_id": "cosworth_dfv",
+  "architecture": "V8",
+  "rpm": 9000,
+  "hp": 400,
+  "torque_nm": null,
+  "displacement_l": 2.993,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "Historical public Cosworth DFV figures (approximate; era variants exist)",
+  "family": "naturally_aspirated"
+}

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 from core.epistemology.evidence import Evidence
 
@@ -16,6 +17,8 @@ class MaterialDecision:
     requirement_value: float | None
     evidence: list[Evidence] = field(default_factory=list)
     confidence: str = "UNKNOWN"
+    # Phase 5.0 structured requirement packet (computed or UNKNOWN).
+    requirement_evidence: dict[str, Any] | None = None
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -35,4 +38,5 @@ class MaterialDecision:
                 for e in self.evidence
             ],
             "confidence": self.confidence,
+            "requirement_evidence": self.requirement_evidence,
         }

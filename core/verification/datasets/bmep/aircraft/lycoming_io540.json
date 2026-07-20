@@ -1,0 +1,13 @@
+{
+  "family": "aircraft",
+  "engine_id": "lycoming_io540",
+  "engine": "Lycoming IO-540 class",
+  "architecture": "Flat-6",
+  "rpm": 2700,
+  "hp": 260,
+  "torque_nm": null,
+  "displacement_l": 8.9,
+  "aspiration": "Naturally aspirated",
+  "fuel": "aviation_gasoline",
+  "source": "Public Lycoming IO-540 class specifications"
+}

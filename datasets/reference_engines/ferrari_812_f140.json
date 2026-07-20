@@ -1,0 +1,28 @@
+{
+  "id": "ferrari_812_f140",
+  "name": "Ferrari 812 Superfast (F140)",
+  "manufacturer": "Ferrari",
+  "year": 2017,
+  "architecture": "V12",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Ferrari 812 Superfast published OEM specifications"
+  ],
+  "published": {
+    "horsepower": 789,
+    "max_rpm": 8900,
+    "displacement_l": 6.496,
+    "bore_mm": 94.0,
+    "stroke_mm": 78.0,
+    "cylinder_count": 12,
+    "torque_nm": 718,
+    "compression_ratio": 13.6,
+    "mass_kg": null,
+    "published_source": "Ferrari 812 Superfast OEM"
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 23.14,
+    "note": "2 * 0.078 * 8900 / 60"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

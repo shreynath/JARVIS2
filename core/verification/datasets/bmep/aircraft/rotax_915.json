@@ -1,0 +1,13 @@
+{
+  "family": "aircraft",
+  "engine_id": "rotax_915",
+  "engine": "Rotax 915 iS class",
+  "architecture": "Flat-4",
+  "rpm": 5800,
+  "hp": 141,
+  "torque_nm": null,
+  "displacement_l": 1.352,
+  "aspiration": "turbocharged",
+  "fuel": "aviation_gasoline",
+  "source": "Public Rotax 915 published power/displacement"
+}

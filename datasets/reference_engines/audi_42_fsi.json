@@ -1,0 +1,28 @@
+{
+  "id": "audi_42_fsi",
+  "name": "Audi 4.2 FSI",
+  "manufacturer": "Audi",
+  "year": 2006,
+  "architecture": "V8",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Audi R8 / RS4 B7 published specifications"
+  ],
+  "published": {
+    "horsepower": 420,
+    "max_rpm": 7800,
+    "displacement_l": 4.163,
+    "bore_mm": 84.5,
+    "stroke_mm": 92.8,
+    "cylinder_count": 8,
+    "torque_nm": 430,
+    "published_source": "Audi 4.2 FSI OEM",
+    "compression_ratio": null,
+    "mass_kg": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 24.13,
+    "note": "2 * 0.0928 * 7800 / 60"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

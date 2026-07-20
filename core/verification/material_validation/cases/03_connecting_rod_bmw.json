@@ -1,0 +1,11 @@
+{
+  "component": "connecting_rod",
+  "material": "Forged Steel 4340 class",
+  "yield_strength_mpa": 710,
+  "fatigue_strength_mpa": 350,
+  "temperature_limit_c": 400,
+  "application": "high_rpm_gasoline",
+  "engine": "BMW S65 class",
+  "source": "Public BMW S65 production rod material class (steel)",
+  "confidence": "medium"
+}

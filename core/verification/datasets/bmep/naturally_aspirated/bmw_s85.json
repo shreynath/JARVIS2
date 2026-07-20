@@ -1,0 +1,13 @@
+{
+  "engine": "BMW S85",
+  "engine_id": "bmw_s85",
+  "architecture": "V10",
+  "rpm": 8250,
+  "hp": 500,
+  "torque_nm": 520,
+  "displacement_l": 4.999,
+  "aspiration": "Naturally aspirated",
+  "fuel": "gasoline",
+  "source": "BMW M5 E60 published specifications",
+  "family": "naturally_aspirated"
+}

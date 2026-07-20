@@ -224,12 +224,18 @@ def main() -> None:
     reality = run_reality_audit(OUT)
     _write("reality_audit.json", reality)
 
+    from core.verification.maturity_report import write_maturity_artifacts
+
+    write_maturity_artifacts(OUT)
+
     # Restore baseline outputs after extreme audit overwrote working tree via other runs —
     # re-write baseline once more for a clean primary artifact set.
     SemanticKernelPipeline(provider=DeterministicProvider()).write_outputs(baseline, OUT)
 
     summary = {
         "reality_overall_confidence": reality.get("overall_confidence"),
+        "average_maturity": reality.get("average_maturity"),
+        "average_maturity_rank": reality.get("average_maturity_rank"),
         "formula_passed": formula.get("passed"),
         "units_passed": run_units_audit().get("passed"),
         "numerical_passed": numerical_scan(physics).get("passed"),
