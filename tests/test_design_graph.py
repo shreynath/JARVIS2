@@ -116,7 +116,7 @@ def test_thermal_constraint_edges_have_component_specific_causality():
             and edge.target_id == component_id
             and edge.source_id.startswith("constraint_thermal_")
         ]
-        assert thermal_constraint_ids
+        assert thermal_constraint_ids, f"missing thermal constraint for {component_id}"
         trace = next(
             edge
             for edge in result.constraint_graph.edges
@@ -124,17 +124,16 @@ def test_thermal_constraint_edges_have_component_specific_causality():
         )
         return trace.description
 
-    radiator = thermal_trace_description("radiator")
+    # Phase 3.1: only evidence-gated materials emit thermal material limits.
     crankshaft = thermal_trace_description("crankshaft")
-    valves = thermal_trace_description("valves")
     camshaft = thermal_trace_description("camshaft")
-    oil_pan = thermal_trace_description("oil_pan")
+    pistons = thermal_trace_description("pistons")
+    rods = thermal_trace_description("connecting_rods")
 
-    assert "combustion heat rejection" in radiator
     assert "friction/mechanical-load heating" in crankshaft
-    assert "combustion/exhaust gas exposure" in valves
     assert "friction/mechanical-load heating" in camshaft
     assert "combustion/exhaust gas exposure" not in camshaft
-    assert "local operating thermal environment" not in oil_pan
-    assert "proximity heat" in oil_pan
-    assert len({radiator, crankshaft, valves, camshaft, oil_pan}) == 5
+    assert result.graph.components["radiator"].material is None
+    assert result.graph.components["oil_pan"].material is None
+    assert result.graph.components["valves"].material is None
+    assert len({crankshaft, camshaft, pistons, rods}) == 4

@@ -105,7 +105,8 @@ def test_every_thermal_hard_limit_appears_in_constraint_evaluations():
             if constraint.type == "maximum_temperature" and constraint.severity.value == "hard_limit":
                 thermal_ids.append(constraint.id)
 
-    assert len(thermal_ids) >= 8, thermal_ids
+    # Phase 3.1: only evidence-gated materials emit material temperature limits.
+    assert thermal_ids, "expected thermal limits on evidence-gated materials"
     eval_ids = {e.id for e in result.validation_report.constraint_evaluations}
     missing = [cid for cid in thermal_ids if f"eval_{cid}" not in eval_ids]
     assert not missing, f"thermal hard_limits missing from evaluations: {missing}"

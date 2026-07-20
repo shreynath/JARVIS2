@@ -1,0 +1,29 @@
+{
+  "id": "cosworth_dfv",
+  "name": "Cosworth DFV (historical F1 class)",
+  "architecture": "V8",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Historical public Cosworth DFV figures (approximate; era variants exist)"
+  ],
+  "published": {
+    "horsepower": 400,
+    "max_rpm": 9000,
+    "displacement_l": 2.993,
+    "bore_mm": 85.67,
+    "stroke_mm": 64.8,
+    "cylinder_count": 8,
+    "compression_ratio": null,
+    "mean_piston_speed_m_s": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 19.44,
+    "note": "2 * 0.0648 * 9000 / 60 — HP/RPM are era-approximate"
+  },
+  "materials": {
+    "connecting_rods": "unknown_public",
+    "pistons": "unknown_public"
+  },
+  "data_quality": "historical_approximate",
+  "caveat": "Power and peak RPM varied by year; used as kinematic stress case, not calibration target."
+}

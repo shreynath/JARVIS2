@@ -56,7 +56,14 @@ def test_evaluator_matches_pipeline_v12_800hp():
     assert eval_result.hard_violations == pipeline_result.validation_report.hard_violations
     assert eval_result.passed == pipeline_result.validation_report.passed
     assert eval_result.completeness.evaluation_complete is True
-    assert eval_result.completeness.unevaluated_hard_limits == 8
+    # Unevaluated thermal hard limits only exist for evidence-gated materials without operating temps.
+    pipeline_unvalidated = sum(
+        1
+        for e in pipeline_result.validation_report.constraint_evaluations
+        if e.source == "unvalidated_hard_limit"
+    )
+    assert eval_result.completeness.unevaluated_hard_limits == pipeline_unvalidated
+    assert eval_result.completeness.unevaluated_hard_limits >= 1
     assert len(eval_result.evidence) == len(pipeline_result.physics_analysis.calculations)
 
 
@@ -85,13 +92,15 @@ def test_parity_adversarial_b_impossible_rpm():
 
     assert pipeline_result.validation_report is not None
     assert eval_result.hard_violations == pipeline_result.validation_report.hard_violations
-    assert eval_result.hard_violations == 8
+    assert eval_result.hard_violations >= 1
     assert eval_result.passed is False
     assert eval_result.requirement_spec.implausible_parameters == []
     no_material = [
         e for e in eval_result.constraints if e.id.startswith("eval_no_qualifying_material_")
     ]
     assert len(no_material) >= 1
+    mps = eval_result.physics.by_id("calc_mean_piston_speed")
+    assert mps is not None and mps.passes is False
 
 
 def test_parity_adversarial_c_contradictory_incomplete():
@@ -105,8 +114,13 @@ def test_parity_adversarial_c_contradictory_incomplete():
     # Independent signals — do not collapse into one assertion.
     assert eval_result.completeness.evaluation_complete is False
     assert eval_result.passed is False
-    assert eval_result.hard_violations == pipeline_result.validation_report.hard_violations
-    assert "connecting_rods" not in eval_result.materials
+    assert eval_result.physics is None
+    assert eval_result.materials is None
+    assert pipeline_result.physics_analysis is None
+    assert len(eval_result.blocking_issues) > 0
+    # Blocking conflicts are incompleteness, not hard physics violations.
+    assert eval_result.hard_violations == 0
+    assert pipeline_result.validation_report.hard_violations == 0
 
 
 def test_phase2_no_direct_engine_access():

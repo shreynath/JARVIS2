@@ -1,0 +1,28 @@
+{
+  "id": "porsche_911_gt3_992_approx",
+  "name": "Porsche 911 GT3 (992) 4.0 flat-6 class",
+  "architecture": "Boxer-6 / Flat-6",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Porsche 992 GT3 public OEM specifications (class reference)"
+  ],
+  "published": {
+    "horsepower": 502,
+    "max_rpm": 9000,
+    "displacement_l": 3.996,
+    "bore_mm": 102.0,
+    "stroke_mm": 81.5,
+    "cylinder_count": 6,
+    "compression_ratio": 13.3,
+    "mean_piston_speed_m_s": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 24.45,
+    "note": "2 * 0.0815 * 9000 / 60"
+  },
+  "materials": {
+    "connecting_rods": "unknown_public",
+    "pistons": "unknown_public"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

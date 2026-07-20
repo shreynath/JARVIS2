@@ -34,14 +34,17 @@ def test_vehicle_engine_no_sub_component_fallback():
 
 
 def test_vehicle_engine_without_targets_is_incomplete_unevaluated():
-    """No RPM/HP → physics chain skipped → incomplete, not a false pass; no invented materials."""
+    """No RPM/HP → physics blocked/incomplete, not a false pass; no invented materials."""
     result = _run_pipeline("Create a vehicle engine specification")
 
     assert result.validation_report is not None
     assert result.validation_report.status == "incomplete"
     assert result.validation_report.passed is False
-    assert "target_horsepower" in result.physics_analysis.unresolved_inputs
-    assert "max_rpm" in result.physics_analysis.unresolved_inputs
+    # Empty resolved_parameters must not silently invent physics defaults.
+    assert result.physics_analysis is not None
+    assert result.evaluation_status.value == "incomplete"
+    unresolved = set(result.physics_analysis.unresolved_inputs)
+    assert unresolved & {"target_horsepower", "max_rpm", "resolved_parameters"}
     assert all(c.material_spec is None for c in result.graph.components.values())
     assert all(c.material is None for c in result.graph.components.values() if _is_engine_role(c))
 

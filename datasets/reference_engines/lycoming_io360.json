@@ -1,0 +1,28 @@
+{
+  "id": "lycoming_io360",
+  "name": "Lycoming IO-360 class",
+  "architecture": "Boxer-4 / Flat-4",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "Lycoming IO-360 published type figures (public aviation)"
+  ],
+  "published": {
+    "horsepower": 200,
+    "max_rpm": 2700,
+    "displacement_l": 5.9,
+    "bore_mm": 130.2,
+    "stroke_mm": 111.1,
+    "cylinder_count": 4,
+    "compression_ratio": 8.7,
+    "mean_piston_speed_m_s": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 9.999,
+    "note": "2 * 0.1111 * 2700 / 60 ≈ 10.0 m/s"
+  },
+  "materials": {
+    "connecting_rods": "unknown_public",
+    "pistons": "unknown_public"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

@@ -6,6 +6,10 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from core.evaluation.issue import Issue
+from core.evaluation.evaluation_status import EvaluationStatus
+from core.evaluation.requirement_integrity import blocking_issues_from_spec
+from core.epistemology.input_requirement import MissingEngineeringInputError
 from core.ir.constraint import CriticIssue
 from core.ir.constraint_graph import ConstraintGraph
 from core.ir.design_graph import EngineeringDesignGraph, EngineeringIntent
@@ -36,10 +40,12 @@ class PipelineResult:
     requirement_spec: RequirementSpecification
     constraint_graph: ConstraintGraph
     functional_analysis: FunctionalAnalysis
-    physics_analysis: PhysicsAnalysis
+    physics_analysis: PhysicsAnalysis | None
     graph: EngineeringDesignGraph
     critic_issues: list[CriticIssue] = field(default_factory=list)
     validation_report: ValidationReport | None = None
+    evaluation_status: EvaluationStatus = EvaluationStatus.COMPLETE
+    blocking_issues: list[Issue] = field(default_factory=list)
 
 
 class SemanticKernelPipeline:
@@ -85,11 +91,55 @@ class SemanticKernelPipeline:
         Intent remains required for functional decomposition / assumption fill; it is not
         re-derived from the spec. Callers that patch resolved_parameters must pass a
         derived (copied) specification — never mutate a shared original.
+
+        Contradictions block evaluation: no physics, materials, or validation conclusions.
         """
+        blocking = blocking_issues_from_spec(requirement_spec)
+        if blocking:
+            empty_graph = EngineeringDesignGraph(
+                name="blocked_evaluation",
+                type=intent.object_type or "unknown",
+                intent=intent,
+                root_id="root",
+            )
+            report = ValidationReport()
+            report.mark_incomplete(
+                "Requirement contradictions block engineering evaluation — "
+                "physics and materials were not computed."
+            )
+            for issue in blocking:
+                report.add_issue(
+                    "warning",
+                    "requirement_conflict",
+                    issue.message,
+                    node_id="root",
+                )
+            return PipelineResult(
+                intent=intent,
+                requirement_spec=requirement_spec,
+                constraint_graph=ConstraintGraph(),
+                functional_analysis=FunctionalAnalysis(
+                    primary_function="blocked_by_requirement_conflict",
+                ),
+                physics_analysis=None,
+                graph=empty_graph,
+                critic_issues=[],
+                validation_report=report,
+                evaluation_status=EvaluationStatus.INCOMPLETE,
+                blocking_issues=blocking,
+            )
+
         constraint_graph = self.constraint_generator.build_graph(requirement_spec)
         functional_analysis = self.functional_engine.analyze(intent, requirement_spec)
         graph = self.decomposition_engine.decompose(intent, functional_analysis, requirement_spec)
-        physics_analysis = self.physics_engine.analyze(requirement_spec)
+        try:
+            physics_analysis = self.physics_engine.analyze(requirement_spec)
+        except MissingEngineeringInputError as exc:
+            # Prefer incomplete over fabricated physics. Continue structural path
+            # (decomposition / critic) without inventing numeric conclusions.
+            physics_analysis = PhysicsAnalysis()
+            physics_analysis.unresolved_inputs = ["resolved_parameters"]
+            physics_analysis.warnings.append(str(exc))
         graph = self.material_assigner.assign(graph, requirement_spec, physics_analysis)
         material_failures = list(self.material_assigner.selection_failures)
         self.constraint_generator.add_design_nodes(constraint_graph, graph)
@@ -104,6 +154,12 @@ class SemanticKernelPipeline:
             graph, requirement_spec, physics_analysis, material_failures=material_failures
         )
 
+        status = EvaluationStatus.COMPLETE
+        if validation_report is not None and not validation_report.evaluation_complete:
+            status = EvaluationStatus.INCOMPLETE
+        elif validation_report is not None and validation_report.hard_violations > 0:
+            status = EvaluationStatus.FAILED
+
         return PipelineResult(
             intent=intent,
             requirement_spec=requirement_spec,
@@ -113,6 +169,8 @@ class SemanticKernelPipeline:
             graph=graph,
             critic_issues=critic_issues,
             validation_report=validation_report,
+            evaluation_status=status,
+            blocking_issues=[],
         )
 
     def _validate(
@@ -152,13 +210,6 @@ class SemanticKernelPipeline:
                 "warning",
                 "missing_decision",
                 f"Unrecognized {term.get('category', 'term')}: {term.get('term')} — {term.get('reason')}",
-                node_id="root",
-            )
-        for conflict in requirement_spec.conflicts:
-            report.add_issue(
-                "warning",
-                "missing_decision",
-                f"Requirement conflict ({conflict.get('inputs')}): {conflict.get('description')}",
                 node_id="root",
             )
         for calculation in physics_analysis.calculations:
@@ -255,7 +306,12 @@ class SemanticKernelPipeline:
         spec_path.write_text(json.dumps(result.requirement_spec.model_dump(), indent=2))
 
         physics_path = out / "physics_analysis.json"
-        physics_path.write_text(json.dumps(result.physics_analysis.model_dump(), indent=2))
+        physics_payload = (
+            result.physics_analysis.model_dump()
+            if result.physics_analysis is not None
+            else {"status": "blocked", "reason": "evaluation incomplete — physics not run"}
+        )
+        physics_path.write_text(json.dumps(physics_payload, indent=2))
 
         assumptions_path = out / "assumptions.json"
         assumptions_path.write_text(
@@ -263,6 +319,11 @@ class SemanticKernelPipeline:
         )
 
         report_data = result.validation_report.model_dump() if result.validation_report else {"passed": False}
+        report_data["evaluation_status"] = result.evaluation_status.value
+        report_data["blocking_issues"] = [
+            {"code": i.code, "message": i.message, "severity": i.severity, "field": i.field}
+            for i in result.blocking_issues
+        ]
         if result.critic_issues:
             report_data["critic_issues"] = [i.model_dump() for i in result.critic_issues]
 

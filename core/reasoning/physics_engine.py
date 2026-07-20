@@ -7,8 +7,14 @@ import math
 from pydantic import BaseModel, Field
 
 from core.epistemology import KnowledgeState
+from core.epistemology.input_requirement import (
+    InputRequirement,
+    InputState,
+    MissingEngineeringInputError,
+)
 from core.ir.constraint import Constraint, ConstraintPriority, ConstraintSeverity
 from core.ir.requirement_spec import RequirementSpecification
+from knowledge.equations.catalog import provenance_for_calc
 
 HP_TO_KW = 0.745699872
 KW_TORQUE_CONSTANT = 9549.0
@@ -44,6 +50,27 @@ class PhysicsCalculation(BaseModel):
     confidence: str = "medium"
     assessment: str = ""
     passes: bool | None = None
+    # Phase 4 provenance — no anonymous formulas.
+    equation_id: str | None = None
+    equation_source: str | None = None
+    engineering_reference: dict | None = None
+    validation_status: str | None = None
+
+
+def _attach_provenance(calc_id: str, kwargs: dict) -> dict:
+    """Merge equation provenance into PhysicsCalculation constructor kwargs."""
+    prov = provenance_for_calc(calc_id)
+    kwargs.setdefault("equation_id", prov.get("equation_id"))
+    kwargs.setdefault("equation_source", prov.get("equation_source"))
+    kwargs.setdefault("engineering_reference", prov.get("engineering_reference"))
+    kwargs.setdefault("validation_status", prov.get("validation_status"))
+    return kwargs
+
+
+def make_physics_calculation(**kwargs) -> PhysicsCalculation:
+    """Construct a PhysicsCalculation with mandatory equation provenance."""
+    calc_id = str(kwargs["id"])
+    return PhysicsCalculation(**_attach_provenance(calc_id, kwargs))
 
 
 class PhysicsAnalysis(BaseModel):
@@ -53,6 +80,7 @@ class PhysicsAnalysis(BaseModel):
     constraints: list[Constraint] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
     unresolved_inputs: list[str] = Field(default_factory=list)
+    input_requirements: list[dict[str, str | float | int | None]] = Field(default_factory=list)
     # Single source of truth: keys bind to calculation IDs (+ optional range mode).
     # operating_conditions is ALWAYS derived from these refs — never independently populated.
     operating_condition_refs: dict[str, str] = Field(default_factory=dict)
@@ -111,15 +139,28 @@ class PhysicsEngine:
         stroke_mm: float | None = None,
     ) -> PhysicsAnalysis:
         params = requirement_spec.resolved_parameters
+        if not params:
+            raise MissingEngineeringInputError(
+                "resolved_parameters",
+                "PhysicsEngine.analyze requires resolved parameters; empty input must not be defaulted.",
+            )
+
         analysis = PhysicsAnalysis()
+        input_reqs = self._resolve_input_requirements(params)
+        analysis.input_requirements = [req.as_dict() for req in input_reqs]
 
         max_rpm = self._float_param(params, "max_rpm")
         target_hp = self._float_param(params, "target_horsepower")
         displacement_l = self._float_param(params, "displacement_l")
         cylinder_count = self._float_param(params, "cylinder_count")
-        aspiration = str(params.get("aspiration", "Naturally aspirated"))
+        aspiration_req = next((r for r in input_reqs if r.name == "aspiration"), None)
+        aspiration = (
+            str(aspiration_req.value)
+            if aspiration_req is not None and aspiration_req.state != InputState.UNKNOWN and aspiration_req.value
+            else None
+        )
 
-        for key in ("target_horsepower", "max_rpm", "displacement_l", "cylinder_count"):
+        for key in ("target_horsepower", "max_rpm", "displacement_l", "cylinder_count", "aspiration"):
             if key not in params:
                 analysis.unresolved_inputs.append(key)
 
@@ -127,7 +168,7 @@ class PhysicsEngine:
             power_kw = target_hp * HP_TO_KW
             torque_nm = power_kw * KW_TORQUE_CONSTANT / max_rpm
             analysis.calculations.append(
-                PhysicsCalculation(
+                make_physics_calculation(
                     id="calc_torque",
                     name="Torque",
                     formula="torque_nm = power_kw * 9549 / rpm",
@@ -165,9 +206,10 @@ class PhysicsEngine:
             cylinder_count=cylinder_count,
         )
         if displacement_range:
-            displacement_depends_on_power = bool(target_hp and max_rpm) or bool(displacement_l)
+            displacement_depends_on_power = bool(target_hp and max_rpm and aspiration) or bool(displacement_l)
+            bmep = self._bmep_range(aspiration) if aspiration else (0.0, 0.0)
             analysis.calculations.append(
-                PhysicsCalculation(
+                make_physics_calculation(
                     id="calc_displacement",
                     name="Displacement estimate",
                     formula=(
@@ -178,8 +220,8 @@ class PhysicsEngine:
                     inputs={
                         "horsepower": target_hp or 0.0,
                         "rpm": max_rpm or 0.0,
-                        "bmep_low_pa": self._bmep_range(aspiration)[0],
-                        "bmep_high_pa": self._bmep_range(aspiration)[1],
+                        "bmep_low_pa": bmep[0],
+                        "bmep_high_pa": bmep[1],
                         "cylinder_count": cylinder_count or 0.0,
                     },
                     result=round(sum(displacement_range) / 2, 2),
@@ -196,7 +238,7 @@ class PhysicsEngine:
                         if displacement_l
                         else (
                             [f"BMEP range inferred from aspiration type: {aspiration}"]
-                            if target_hp and max_rpm
+                            if target_hp and max_rpm and aspiration
                             else ["Displacement not provided; estimated from cylinder count and representative per-cylinder displacement range."]
                         )
                     ),
@@ -210,14 +252,19 @@ class PhysicsEngine:
             analysis.bind_operating("displacement_l_low", "calc_displacement", use_low=True)
             analysis.bind_operating("displacement_l_high", "calc_displacement", use_high=True)
         else:
+            missing = ["target_horsepower", "displacement_l", "cylinder_count"]
+            if target_hp and max_rpm and not aspiration:
+                missing = ["aspiration"]
             self._add_skipped(
                 analysis,
                 calculation_id="calc_displacement",
                 name="Displacement estimate",
                 formula="displacement_m3 = brake_power_w * 120 / (bmep_pa * rpm)",
-                missing_inputs=["target_horsepower", "displacement_l", "cylinder_count"],
+                missing_inputs=missing,
                 reason=(
-                    "Displacement requires a known displacement, power/RPM for BMEP derivation, "
+                    "Displacement requires known aspiration for BMEP derivation (no silent default), "
+                    if target_hp and max_rpm and not aspiration
+                    else "Displacement requires a known displacement, power/RPM for BMEP derivation, "
                     "or cylinder count for a representative geometry estimate."
                 ),
             )
@@ -232,7 +279,7 @@ class PhysicsEngine:
                 "Stroke estimated from displacement per cylinder and bore/stroke ratio range."
             ]
             analysis.calculations.append(
-                PhysicsCalculation(
+                make_physics_calculation(
                     id="calc_stroke",
                     name="Stroke estimate",
                     formula="stroke = cubic_root(4 * displacement_per_cylinder / (pi * bore_stroke_ratio^2))",
@@ -268,7 +315,7 @@ class PhysicsEngine:
             assessment = self._piston_speed_assessment(max(mps_range))
             passes = max(mps_range) <= 26.0
             analysis.calculations.append(
-                PhysicsCalculation(
+                make_physics_calculation(
                     id="calc_mean_piston_speed",
                     name="Mean piston speed",
                     formula="Vp = 2 × stroke × RPM / 60",
@@ -308,7 +355,7 @@ class PhysicsEngine:
         if max_rpm and stroke_range:
             acceleration_range = tuple((stroke / 1000.0 / 2.0) * (2.0 * math.pi * max_rpm / 60.0) ** 2 for stroke in stroke_range)
             analysis.calculations.append(
-                PhysicsCalculation(
+                make_physics_calculation(
                     id="calc_piston_acceleration",
                     name="Peak piston acceleration estimate",
                     formula="a_peak = crank_radius * angular_velocity^2",
@@ -338,7 +385,7 @@ class PhysicsEngine:
                 reason="Piston acceleration requires RPM and stroke.",
             )
 
-        if acceleration_range and stroke_range and displacement_range and cylinder_count:
+        if acceleration_range and stroke_range and displacement_range and cylinder_count and aspiration:
             force_range, stress_range = self._reciprocating_load_ranges(
                 displacement_range,
                 stroke_range,
@@ -347,7 +394,7 @@ class PhysicsEngine:
                 aspiration,
             )
             analysis.calculations.append(
-                PhysicsCalculation(
+                make_physics_calculation(
                     id="calc_rod_loading",
                     name="Connecting rod loading estimate",
                     formula="rod_load = piston_mass * acceleration + peak_pressure * bore_area",
@@ -374,7 +421,7 @@ class PhysicsEngine:
                 )
             )
             analysis.calculations.append(
-                PhysicsCalculation(
+                make_physics_calculation(
                     id="calc_rod_stress_requirement",
                     name="Rod stress requirement estimate",
                     formula="stress = rod_load / effective_section_area",
@@ -430,16 +477,28 @@ class PhysicsEngine:
                         ("stroke_estimate", stroke_range),
                         ("displacement_l", displacement_range),
                         ("cylinder_count", cylinder_count),
+                        ("aspiration", aspiration),
                     )
                     if value is None
                 ],
-                reason="Rod loading requires acceleration, geometry, displacement, and cylinder count.",
+                reason=(
+                    "Rod loading requires acceleration, geometry, displacement, cylinder count, "
+                    "and known aspiration (no silent default)."
+                ),
+            )
+            self._add_skipped(
+                analysis,
+                calculation_id="calc_rod_stress_requirement",
+                name="Rod stress requirement estimate",
+                formula="stress = rod_load / effective_section_area",
+                missing_inputs=["calc_rod_loading"],
+                reason="Rod stress requirement depends on rod loading estimate.",
             )
 
         if target_hp:
             thermal_range = self._cooling_heat_rejection_range(target_hp)
             analysis.calculations.append(
-                PhysicsCalculation(
+                make_physics_calculation(
                     id="calc_heat_rejection",
                     name="Cooling heat rejection estimate",
                     formula="cooling_heat = brake_power / thermal_efficiency * coolant_heat_fraction",
@@ -479,7 +538,7 @@ class PhysicsEngine:
             # link via a dedicated synthetic calc so consumers can reference by ID.
             heat_calc = analysis.by_id("calc_heat_rejection")
             analysis.calculations.append(
-                PhysicsCalculation(
+                make_physics_calculation(
                     id="calc_combustion_side_temperature",
                     name="Combustion-side temperature estimate",
                     formula="T ≈ 180 + min(120, cooling_heat_kw / 8)",
@@ -525,7 +584,7 @@ class PhysicsEngine:
         reason: str,
     ) -> None:
         analysis.calculations.append(
-            PhysicsCalculation(
+            make_physics_calculation(
                 id=calculation_id,
                 name=name,
                 formula=formula,
@@ -537,6 +596,33 @@ class PhysicsEngine:
                 passes=None,
             )
         )
+
+    @staticmethod
+    def _resolve_input_requirements(
+        params: dict[str, str | float | int],
+    ) -> list[InputRequirement]:
+        """Expose every physics-critical input as KNOWN / ASSUMED / UNKNOWN — never silent default."""
+        reqs: list[InputRequirement] = []
+        for name in ("target_horsepower", "max_rpm", "displacement_l", "cylinder_count", "aspiration"):
+            if name in params and params[name] is not None:
+                reqs.append(
+                    InputRequirement(
+                        name=name,
+                        value=params[name],
+                        state=InputState.KNOWN,
+                        source="explicit_prompt",
+                    )
+                )
+            else:
+                reqs.append(
+                    InputRequirement(
+                        name=name,
+                        value=None,
+                        state=InputState.UNKNOWN,
+                        source="unresolved",
+                    )
+                )
+        return reqs
 
     @staticmethod
     def _float_param(params: dict[str, str | float | int], key: str) -> float | None:
@@ -560,23 +646,26 @@ class PhysicsEngine:
         target_hp: float | None,
         max_rpm: float | None,
         displacement_l: float | None,
-        aspiration: str,
+        aspiration: str | None,
         cylinder_count: float | None,
     ) -> tuple[float, float] | None:
         if displacement_l:
             return displacement_l, displacement_l
-        if not target_hp or not max_rpm:
-            if cylinder_count:
-                return (
-                    cylinder_count * DEFAULT_DISPLACEMENT_PER_CYLINDER_L_RANGE[0],
-                    cylinder_count * DEFAULT_DISPLACEMENT_PER_CYLINDER_L_RANGE[1],
-                )
-            return None
-        power_w = target_hp * HP_TO_KW * 1000.0
-        bmep_low, bmep_high = self._bmep_range(aspiration)
-        high_l = power_w * FOUR_STROKE_POWER_FACTOR / (bmep_low * max_rpm) * 1000.0
-        low_l = power_w * FOUR_STROKE_POWER_FACTOR / (bmep_high * max_rpm) * 1000.0
-        return low_l, high_l
+        # Power/RPM BMEP path requires known aspiration — never invent NA.
+        if target_hp and max_rpm:
+            if not aspiration:
+                return None
+            power_w = target_hp * HP_TO_KW * 1000.0
+            bmep_low, bmep_high = self._bmep_range(aspiration)
+            high_l = power_w * FOUR_STROKE_POWER_FACTOR / (bmep_low * max_rpm) * 1000.0
+            low_l = power_w * FOUR_STROKE_POWER_FACTOR / (bmep_high * max_rpm) * 1000.0
+            return low_l, high_l
+        if cylinder_count:
+            return (
+                cylinder_count * DEFAULT_DISPLACEMENT_PER_CYLINDER_L_RANGE[0],
+                cylinder_count * DEFAULT_DISPLACEMENT_PER_CYLINDER_L_RANGE[1],
+            )
+        return None
 
     @staticmethod
     def _stroke_range(

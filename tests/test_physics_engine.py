@@ -90,7 +90,7 @@ def test_rpm_sweep_changes_continuously():
 
 def test_material_selection_is_deterministic_and_uses_derived_requirements():
     requirement = MaterialRequirement(
-        role="reciprocating",
+        role="structural_load_path",
         required_yield_mpa=620.0,
         required_fatigue_mpa=320.0,
         required_temperature_c=160.0,
@@ -99,8 +99,8 @@ def test_material_selection_is_deterministic_and_uses_derived_requirements():
     )
     assigner = MaterialAssigner()
 
-    first, _ = assigner.select_material(requirement)
-    second, _ = assigner.select_material(requirement)
+    first, _ = assigner.select_material(requirement, component_id="connecting_rods")
+    second, _ = assigner.select_material(requirement, component_id="connecting_rods")
 
     assert first is not None
     assert second is not None
@@ -113,7 +113,7 @@ def test_material_selection_is_deterministic_and_uses_derived_requirements():
 def test_material_selection_uses_threshold_then_objective():
     assigner = MaterialAssigner()
     low_load = MaterialRequirement(
-        role="reciprocating",
+        role="structural_load_path",
         required_yield_mpa=585.0,
         required_fatigue_mpa=304.0,
         required_temperature_c=160.0,
@@ -121,7 +121,7 @@ def test_material_selection_uses_threshold_then_objective():
         source="calc_rod_stress_requirement",
     )
     high_load = MaterialRequirement(
-        role="reciprocating",
+        role="structural_load_path",
         required_yield_mpa=645.0,
         required_fatigue_mpa=335.0,
         required_temperature_c=160.0,
@@ -129,5 +129,5 @@ def test_material_selection_uses_threshold_then_objective():
         source="calc_rod_stress_requirement",
     )
 
-    assert assigner.select_material(low_load)[0].name == "Forged Steel 4340"
-    assert assigner.select_material(high_load)[0].name == "Titanium 6Al-4V"
+    assert assigner.select_material(low_load, component_id="connecting_rods")[0].name == "Forged Steel 4340"
+    assert assigner.select_material(high_load, component_id="connecting_rods")[0].name == "Titanium 6Al-4V"

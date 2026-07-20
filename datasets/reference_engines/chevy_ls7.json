@@ -1,0 +1,28 @@
+{
+  "id": "chevy_ls7",
+  "name": "Chevrolet LS7",
+  "architecture": "V8",
+  "aspiration": "Naturally aspirated",
+  "verified_sources": [
+    "GM LS7 published specifications (Corvette Z06 era)"
+  ],
+  "published": {
+    "horsepower": 505,
+    "max_rpm": 7000,
+    "displacement_l": 7.011,
+    "bore_mm": 104.8,
+    "stroke_mm": 101.6,
+    "cylinder_count": 8,
+    "compression_ratio": 11.0,
+    "mean_piston_speed_m_s": null
+  },
+  "derived_checks": {
+    "mean_piston_speed_at_redline_m_s": 23.71,
+    "note": "2 * 0.1016 * 7000 / 60"
+  },
+  "materials": {
+    "connecting_rods": "titanium_reported_public",
+    "pistons": "unknown_public"
+  },
+  "data_quality": "published_oem_geometry_power"
+}

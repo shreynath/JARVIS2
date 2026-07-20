@@ -27,6 +27,14 @@ def main() -> None:
 
     print(f"\nIntent: {result.intent.design_goal}")
     print(f"Object type: {result.intent.object_type}")
+    print(f"EvaluationStatus: {result.evaluation_status.value.upper()}")
+    if result.blocking_issues:
+        print(f"Blocking issues: {len(result.blocking_issues)}")
+        for issue in result.blocking_issues:
+            print(f"  - [{issue.code}] {issue.message}")
+    print(f"Physics: {'None' if result.physics_analysis is None else 'computed'}")
+    materials_assigned = sum(1 for c in result.graph.components.values() if c.material)
+    print(f"Materials: {'None' if result.evaluation_status.value == 'incomplete' and result.physics_analysis is None else materials_assigned}")
     print(f"Components: {len(result.graph.components)}")
     print(f"Assumptions: {len(result.graph.assumptions)}")
     print(f"Critic issues: {len(result.critic_issues)}")

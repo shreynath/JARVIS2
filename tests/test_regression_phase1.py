@@ -125,9 +125,17 @@ def test_camshaft_thermal_edge_is_mechanical_not_combustion():
 
 
 def test_lubrication_thermal_edges_not_generic_placeholder():
-    """Fix 2b: lubrication components must not use generic thermal placeholder."""
+    """Fix 2b: when a material exists, lubrication thermal edges must be causal — not placeholders.
+
+    Phase 3.1: oil_pan / oil_pickup_tube have no computed material requirement, so they
+    correctly remain unassigned and do not invent thermal material limits. Components that
+    do receive evidence-gated materials must still carry non-generic thermal traces.
+    """
     result = _run()
-    for component_id in ("oil_pan", "oil_pickup_tube", "main_oil_gallery"):
+    assigned_thermal = []
+    for component_id, comp in result.graph.components.items():
+        if comp.material_spec is None:
+            continue
         thermal_ids = [
             e.source_id
             for e in result.constraint_graph.edges
@@ -135,14 +143,19 @@ def test_lubrication_thermal_edges_not_generic_placeholder():
             and e.target_id == component_id
             and e.source_id.startswith("constraint_thermal_")
         ]
-        assert thermal_ids, f"missing thermal constraint for {component_id}"
-        trace = next(
-            e
-            for e in result.constraint_graph.edges
-            if e.edge_type.value == "traces_to" and e.target_id == thermal_ids[0]
-        )
-        assert "local operating thermal environment" not in trace.description
-        assert "traces to" in trace.description
+        if thermal_ids:
+            assigned_thermal.append(component_id)
+            trace = next(
+                e
+                for e in result.constraint_graph.edges
+                if e.edge_type.value == "traces_to" and e.target_id == thermal_ids[0]
+            )
+            assert "local operating thermal environment" not in trace.description
+            assert "traces to" in trace.description
+    assert assigned_thermal, "expected at least one evidence-gated material with thermal limit"
+    # Explicit honesty check: housing/fluid parts without computed requirements stay bare.
+    for component_id in ("oil_pan", "oil_pickup_tube", "radiator"):
+        assert result.graph.components[component_id].material is None
 
 
 def test_derived_values_referenced_by_calculation_id():

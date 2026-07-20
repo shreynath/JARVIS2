@@ -1,19 +1,23 @@
-"""Material assigner — deterministic selection from calculated operating conditions."""
+"""Material assigner — evidence-gated selection from computed requirements only."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
+from core.epistemology.evidence import Evidence
+from core.epistemology.knowledge_state import KnowledgeState
 from core.ir.design_graph import EngineeringDesignGraph
 from core.ir.material import MaterialSpec
 from core.ir.requirement_spec import RequirementSpecification
+from core.materials.component_role import ComponentRole, role_for_component
+from core.materials.material_decision import MaterialDecision
 from core.reasoning.physics_engine import PhysicsAnalysis
 from knowledge.materials.catalog import MATERIAL_CATALOG
 
 
 @dataclass(frozen=True)
 class MaterialRequirement:
-    """Physical requirements used to rank material candidates."""
+    """Physical requirements used to rank material candidates — must be computed."""
 
     role: str
     required_yield_mpa: float
@@ -21,42 +25,41 @@ class MaterialRequirement:
     required_temperature_c: float
     mass_sensitive: bool
     source: str
+    evidence_calc_ids: tuple[str, ...] = ()
 
 
 class MaterialAssigner:
-    """Assign MaterialSpec by comparing catalog properties against physics requirements."""
-
-    _NAME_TO_CATALOG: dict[str, str] = {
-        entry["name"].lower(): key for key, entry in MATERIAL_CATALOG.items()
-    }
-    _NAME_TO_CATALOG.update(
-        {
-            "aluminum alloy": "al_356_t6",
-            "2618 aluminum": "al_2618",
-            "4032 aluminum": "al_4032",
-            "forged aluminum alloy": "al_2618",
-            "forged steel": "forged_steel_4340",
-            "cast iron liners": "cast_iron_gray",
-            "cast iron": "cast_iron_gray",
-            "titanium": "ti_6al4v",
-            "inconel": "in718",
-            "stainless steel": "stainless_steel_21_4n",
-            "bronze": "bronze_sae660",
-        }
-    )
+    """Assign MaterialSpec only when a computed requirement exists for the component role."""
 
     _ROLE_CANDIDATES: dict[str, list[str]] = {
-        "reciprocating": ["forged_steel_4340", "ti_6al4v"],
-        "piston": ["al_2618", "al_4032", "ti_6al4v"],
-        "hot_gas": ["stainless_steel_21_4n", "in718", "ti_6al4v"],
-        "structural_hot": ["al_356_t6", "cast_iron_gray", "forged_steel_4340"],
-        "shaft": ["forged_steel_4340", "nitrided_steel", "ti_6al4v"],
-        "bearing": ["bronze_sae660", "forged_steel_4340", "nitrided_steel"],
-        "housing": ["al_356_t6", "cast_iron_gray", "forged_steel_4340"],
+        ComponentRole.STRUCTURAL_LOAD_PATH.value: ["forged_steel_4340", "ti_6al4v"],
+        ComponentRole.ROTATING_MASS.value: [
+            "forged_steel_4340",
+            "nitrided_steel",
+            "ti_6al4v",
+            "al_2618",
+            "al_4032",
+        ],
+        ComponentRole.PRESSURE_BOUNDARY.value: ["cast_iron_gray", "forged_steel_4340", "al_356_t6"],
+        ComponentRole.THERMAL_SYSTEM.value: ["al_356_t6", "cast_iron_gray", "forged_steel_4340"],
+        ComponentRole.FLUID_COMPONENT.value: ["al_356_t6", "cast_iron_gray", "forged_steel_4340"],
+    }
+
+    # Candidate filters by component — still keyed by id, not substring name matching.
+    _COMPONENT_CANDIDATES: dict[str, list[str]] = {
+        "connecting_rods": ["forged_steel_4340", "ti_6al4v"],
+        "rod_primary": ["forged_steel_4340", "ti_6al4v"],
+        "rotating_link": ["forged_steel_4340", "ti_6al4v"],
+        "rod_piece_xyz": ["forged_steel_4340", "ti_6al4v"],
+        "pistons": ["al_2618", "al_4032", "ti_6al4v"],
+        "crankshaft": ["forged_steel_4340", "nitrided_steel", "ti_6al4v"],
+        "camshaft": ["forged_steel_4340", "nitrided_steel", "ti_6al4v"],
+        "main_bearings": ["forged_steel_4340", "nitrided_steel", "ti_6al4v"],
     }
 
     def __init__(self) -> None:
         self.selection_failures: list[dict[str, object]] = []
+        self.decisions: list[MaterialDecision] = []
 
     def assign(
         self,
@@ -65,38 +68,97 @@ class MaterialAssigner:
         physics_analysis: PhysicsAnalysis | None = None,
     ) -> EngineeringDesignGraph:
         self.selection_failures = []
-        # Unrecognized material terms must not be silently replaced with catalog properties.
-        blocked_roles = set()
+        self.decisions = []
+
+        blocked_components: set[str] = set()
         if requirement_spec is not None:
             for term in requirement_spec.unrecognized_terms:
                 if term.get("category") == "material":
-                    blocked_roles.add("reciprocating")
+                    # Unknown material named in prompt — do not invent rods/pistons substitution.
+                    blocked_components.update({"connecting_rods", "pistons", "rod_primary", "rotating_link", "rod_piece_xyz"})
 
         for comp in graph.components.values():
-            role = self._component_role(comp.id, comp.name, comp.function)
-            if role in blocked_roles:
-                comp.material = None
-                comp.material_spec = None
-                continue
-
-            requirement = self._requirement_for_component(
-                comp.id, comp.name, comp.function, physics_analysis
-            )
-            if requirement is None:
-                # No real computed requirement → leave unassigned (clear template ghosts).
-                if role is not None:
-                    comp.material = None
-                    comp.material_spec = None
-                continue
-
-            selected, rankings = self.select_material(requirement)
-            if selected is not None:
-                comp.material_spec = selected
-                comp.material = selected.name
-                continue
-
+            # Always clear template ghost materials before evidence-gated assignment.
             comp.material = None
             comp.material_spec = None
+
+            role = role_for_component(comp.id)
+            if comp.id in blocked_components or role == ComponentRole.UNKNOWN:
+                self.decisions.append(
+                    MaterialDecision(
+                        component_id=comp.id,
+                        role=role.value,
+                        selected_material=None,
+                        requirement_source=None,
+                        requirement_value=None,
+                        evidence=[],
+                        confidence="UNKNOWN",
+                    )
+                )
+                continue
+
+            requirement = self._requirement_for_role(role, comp.id, physics_analysis)
+            if requirement is None:
+                self.decisions.append(
+                    MaterialDecision(
+                        component_id=comp.id,
+                        role=role.value,
+                        selected_material=None,
+                        requirement_source=None,
+                        requirement_value=None,
+                        evidence=[],
+                        confidence="UNKNOWN",
+                    )
+                )
+                continue
+
+            selected, rankings = self.select_material(requirement, component_id=comp.id)
+            evidence = [
+                Evidence(
+                    claim=f"computed requirement from {calc_id}",
+                    state=KnowledgeState.DERIVED,
+                    confidence="medium",
+                    reason=requirement.source,
+                    source_calc_id=calc_id,
+                )
+                for calc_id in requirement.evidence_calc_ids
+            ]
+            if selected is not None:
+                evidence.append(
+                    Evidence(
+                        claim="yield_strength_catalog",
+                        state=KnowledgeState.KNOWN,
+                        confidence="high",
+                        reason=f"catalog comparison selected {selected.name}",
+                        source_calc_id=None,
+                    )
+                )
+                comp.material_spec = selected
+                comp.material = selected.name
+                self.decisions.append(
+                    MaterialDecision(
+                        component_id=comp.id,
+                        role=role.value,
+                        selected_material=selected.name,
+                        requirement_source=requirement.source,
+                        requirement_value=requirement.required_yield_mpa,
+                        evidence=evidence,
+                        confidence="high" if requirement.evidence_calc_ids else "UNKNOWN",
+                    )
+                )
+                continue
+
+            self.decisions.append(
+                MaterialDecision(
+                    component_id=comp.id,
+                    role=role.value,
+                    selected_material=None,
+                    requirement_source=requirement.source,
+                    requirement_value=requirement.required_yield_mpa,
+                    evidence=evidence,
+                    confidence="UNKNOWN",
+                )
+            )
             best = rankings[0] if rankings else {}
             self.selection_failures.append(
                 {
@@ -122,9 +184,14 @@ class MaterialAssigner:
         return graph
 
     def select_material(
-        self, requirement: MaterialRequirement
+        self,
+        requirement: MaterialRequirement,
+        component_id: str | None = None,
     ) -> tuple[MaterialSpec | None, list[dict[str, str | float | int | bool | None]]]:
-        candidates = self._ROLE_CANDIDATES.get(requirement.role, [])
+        if component_id and component_id in self._COMPONENT_CANDIDATES:
+            candidates = self._COMPONENT_CANDIDATES[component_id]
+        else:
+            candidates = self._ROLE_CANDIDATES.get(requirement.role, [])
         ranked: list[dict[str, str | float | int | bool | None]] = []
 
         for key in candidates:
@@ -139,7 +206,6 @@ class MaterialAssigner:
             thermal_margin = temp_limit / requirement.required_temperature_c if requirement.required_temperature_c else 999.0
             hard_constraints_met = yield_margin >= 1.0 and fatigue_margin >= 1.0 and thermal_margin >= 1.0
             limiting_margin = min(yield_margin, fatigue_margin, thermal_margin)
-            density_penalty = density if requirement.mass_sensitive else 0.0
 
             ranked.append(
                 {
@@ -151,7 +217,7 @@ class MaterialAssigner:
                     "thermal_margin": round(thermal_margin, 3),
                     "limiting_margin": round(limiting_margin, 3),
                     "density_kg_m3": density,
-                    "mass_sensitive_density_penalty": density_penalty,
+                    "mass_sensitive_density_penalty": density if requirement.mass_sensitive else 0.0,
                     "relative_cost": relative_cost,
                 }
             )
@@ -198,99 +264,60 @@ class MaterialAssigner:
         )
         return spec, ranked
 
-    def _requirement_for_component(
+    def _requirement_for_role(
         self,
+        role: ComponentRole,
         component_id: str,
-        name: str,
-        function: str,
         physics_analysis: PhysicsAnalysis | None,
     ) -> MaterialRequirement | None:
-        role = self._component_role(component_id, name, function)
-        if role is None:
-            return None
-
+        """Only emit requirements backed by computed physics — no fixed theater floors."""
         rod_stress = self._computed_value(physics_analysis, "calc_rod_stress_requirement")
         combustion_temp = self._computed_value(physics_analysis, "calc_combustion_side_temperature")
-        rod_loading = self._computed_value(physics_analysis, "calc_rod_loading")
 
-        # No invented defaults: if the driving calculation did not run, do not assign material.
-        if role in {"reciprocating", "piston", "shaft"} and rod_stress is None:
-            return None
-        if role in {"hot_gas", "structural_hot", "piston"} and combustion_temp is None:
-            return None
-        if role in {"bearing"} and rod_loading is None:
-            return None
-        if role == "housing" and rod_loading is None and rod_stress is None:
-            # Housing only when some load pathway exists (physics chain at least started).
-            return None
-
-        assert rod_stress is not None or role in {"hot_gas", "structural_hot", "bearing", "housing"}
-        stress = float(rod_stress) if rod_stress is not None else 0.0
-        temp = float(combustion_temp) if combustion_temp is not None else 0.0
-
-        if role == "reciprocating":
+        if role == ComponentRole.STRUCTURAL_LOAD_PATH:
+            if rod_stress is None:
+                return None
+            stress = float(rod_stress)
             return MaterialRequirement(
-                role=role,
-                required_yield_mpa=max(stress * 1.25, 220.0),
-                required_fatigue_mpa=max(stress * 0.65, 160.0),
+                role=role.value,
+                required_yield_mpa=stress * 1.25,
+                required_fatigue_mpa=stress * 0.65,
                 required_temperature_c=160.0,
                 mass_sensitive=True,
                 source="calc_rod_stress_requirement",
+                evidence_calc_ids=("calc_rod_stress_requirement",),
             )
-        if role == "piston":
+
+        if role == ComponentRole.ROTATING_MASS:
+            if rod_stress is None:
+                return None
+            stress = float(rod_stress)
+            # Pistons: reciprocating mass — mass-sensitive, combustion temp when available.
+            if component_id == "pistons":
+                if combustion_temp is None:
+                    return None
+                return MaterialRequirement(
+                    role=role.value,
+                    required_yield_mpa=stress * 0.55,
+                    required_fatigue_mpa=stress * 0.30,
+                    required_temperature_c=float(combustion_temp),
+                    mass_sensitive=True,
+                    source="calc_rod_stress_requirement + calc_combustion_side_temperature",
+                    evidence_calc_ids=("calc_rod_stress_requirement", "calc_combustion_side_temperature"),
+                )
+            # Shafts / bearings: torque+rod load path — stress-derived, not mass-sensitive.
             return MaterialRequirement(
-                role=role,
-                required_yield_mpa=max(stress * 0.55, 180.0),
-                required_fatigue_mpa=max(stress * 0.30, 90.0),
-                required_temperature_c=temp,
-                mass_sensitive=True,
-                source="calc_rod_loading + calc_heat_rejection",
-            )
-        if role == "hot_gas":
-            return MaterialRequirement(
-                role=role,
-                required_yield_mpa=280.0,
-                required_fatigue_mpa=180.0,
-                required_temperature_c=max(temp + 250.0, 650.0),
-                mass_sensitive=False,
-                source="calc_heat_rejection",
-            )
-        if role == "structural_hot":
-            return MaterialRequirement(
-                role=role,
-                required_yield_mpa=180.0,
-                required_fatigue_mpa=80.0,
-                required_temperature_c=temp,
-                mass_sensitive=False,
-                source="calc_heat_rejection",
-            )
-        if role == "shaft":
-            return MaterialRequirement(
-                role=role,
-                required_yield_mpa=max(stress * 0.9, 350.0),
-                required_fatigue_mpa=max(stress * 0.45, 220.0),
+                role=role.value,
+                required_yield_mpa=stress * 0.9,
+                required_fatigue_mpa=stress * 0.45,
                 required_temperature_c=180.0,
                 mass_sensitive=False,
-                source="calc_torque + calc_rod_loading",
+                source="calc_rod_stress_requirement",
+                evidence_calc_ids=("calc_rod_stress_requirement",),
             )
-        if role == "bearing":
-            return MaterialRequirement(
-                role=role,
-                required_yield_mpa=120.0,
-                required_fatigue_mpa=70.0,
-                required_temperature_c=160.0,
-                mass_sensitive=False,
-                source="calc_rod_loading",
-            )
-        if role == "housing":
-            return MaterialRequirement(
-                role=role,
-                required_yield_mpa=140.0,
-                required_fatigue_mpa=70.0,
-                required_temperature_c=140.0,
-                mass_sensitive=True,
-                source="structural containment requirement",
-            )
+
+        # PRESSURE_BOUNDARY / THERMAL_SYSTEM / FLUID_COMPONENT have no standalone
+        # computed yield/fatigue pathway in the Phase 1 physics engine — refuse assignment.
         return None
 
     @staticmethod
@@ -304,36 +331,4 @@ class MaterialAssigner:
             return float(max(calc.value_range))
         if calc.result is not None:
             return float(calc.result)
-        return None
-
-    @staticmethod
-    def _component_role(component_id: str, name: str, function: str) -> str | None:
-        text = f"{component_id} {name} {function}".lower()
-        # Order matters: piston functions often mention connecting rods.
-        if "piston" in text and "connecting_rod" not in component_id.lower():
-            return "piston"
-        if "connecting rod" in text or "connecting_rods" in text or component_id == "connecting_rods":
-            return "reciprocating"
-        if "exhaust" in text or "combustor" in text or "turbine" in text:
-            return "hot_gas"
-        if "cylinder head" in text or "engine block" in text or "cylinder bore" in text:
-            return "structural_hot"
-        if "crankshaft" in text or "camshaft" in text or "shaft" in text or "gear" in text:
-            return "shaft"
-        if "bearing" in text or "bushing" in text:
-            return "bearing"
-        if "housing" in text or "pan" in text or "radiator" in text:
-            return "housing"
-        return None
-
-    def _catalog_key_from_declared_material(self, material: str | None) -> str | None:
-        if not material:
-            return None
-        lower = material.lower()
-        key = self._NAME_TO_CATALOG.get(lower)
-        if key:
-            return key
-        for catalog_key, entry in MATERIAL_CATALOG.items():
-            if str(entry["name"]).lower() in lower:
-                return catalog_key
         return None

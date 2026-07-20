@@ -29,8 +29,9 @@ def _conf(c):
     return c.value if hasattr(c, "value") else c
 
 
-def chain(result) -> dict:
+def chain(result, *, comparison_mode: str) -> dict:
     pa = result.physics_analysis
+    assert pa is not None, "continuity sweep requires computed physics"
     rods = result.graph.components.get("connecting_rods")
     metrics = (rods.material_spec.selection_metrics if rods and rods.material_spec else {}) or {}
     rankings = (rods.material_spec.candidate_rankings if rods and rods.material_spec else []) or []
@@ -64,6 +65,7 @@ def chain(result) -> dict:
     ]
 
     return {
+        "comparison_mode": comparison_mode,
         "torque": c("calc_torque"),
         "displacement": c("calc_displacement"),
         "stroke": c("calc_stroke"),
@@ -122,20 +124,21 @@ def check_continuity(rows: list[dict], label: str) -> list[str]:
 
 
 def main() -> None:
+    comparison_mode = "constant_power_resized_design"
     pipeline = SemanticKernelPipeline(provider=DeterministicProvider())
     sweep_a = []
     for rpm in range(5000, 13001, 500):
         result = pipeline.run(
             f"Design a {rpm} RPM naturally aspirated V8 producing {HOLD_HP} horsepower."
         )
-        sweep_a.append({"rpm": rpm, "hp": HOLD_HP, **chain(result)})
+        sweep_a.append({"rpm": rpm, "hp": HOLD_HP, **chain(result, comparison_mode=comparison_mode)})
 
     sweep_b = []
     for hp in range(200, 901, 100):
         result = pipeline.run(
             f"Design a {HOLD_RPM} RPM naturally aspirated V8 producing {hp} horsepower."
         )
-        sweep_b.append({"rpm": HOLD_RPM, "hp": hp, **chain(result)})
+        sweep_b.append({"rpm": HOLD_RPM, "hp": hp, **chain(result, comparison_mode=comparison_mode)})
 
     out = {
         "schema": {
@@ -151,6 +154,10 @@ def main() -> None:
                 ],
                 "material_requirement": ["req_yield", "mass_sensitive", "material", "source"],
                 "candidate_ranking": "top_candidates[] (owns limiting_margin / margins / hard_constraints_met)",
+                "comparison_mode": (
+                    "Every sweep row declares comparison_mode. "
+                    "constant_power_resized_design = BMEP-derived displacement re-sizes with RPM/HP."
+                ),
             },
             "removed_null_aliases": [
                 "limiting_margin",
@@ -160,9 +167,12 @@ def main() -> None:
             ],
         },
         "holds": {"sweep_a_hp": HOLD_HP, "sweep_b_rpm": HOLD_RPM},
+        "comparison_mode": comparison_mode,
         "baseline_note": (
             "V8/500hp and V8/7000rpm deliberately chosen for continuity "
-            "(not V12/800 worked example)"
+            "(not V12/800 worked example). "
+            f"comparison_mode={comparison_mode}: rod load may fall as RPM rises because "
+            "displacement shrinks under constant-power BMEP sizing."
         ),
         "sweep_a": sweep_a,
         "sweep_b": sweep_b,
@@ -179,8 +189,10 @@ def main() -> None:
     assert "req_fatigue" not in row
     assert "req_temp" not in row
     assert "hard_constraints_met" not in row
+    assert row["comparison_mode"] == comparison_mode
+    assert all("comparison_mode" in x for x in sweep_a + sweep_b)
     assert row["top_candidates"][0]["limiting_margin"] is not None
-    print("schema OK: no stale top-level nulls; limiting_margin only under top_candidates")
+    print("schema OK: comparison_mode declared; limiting_margin only under top_candidates")
 
 
 if __name__ == "__main__":
