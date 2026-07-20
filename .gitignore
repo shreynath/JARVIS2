@@ -3,6 +3,8 @@ __pycache__/
 .pytest_cache/
 .hypothesis/
 output/
+core/verification/evidence_store/pending/*.json
+core/verification/evidence_store/approved/*.json
 *.egg-info/
 .venv/
 .env
