@@ -18,6 +18,7 @@ from core.verification.rod_campaign import (
     build_rod_maturity_packet,
     write_rod_campaign_reports,
 )
+from core.verification.prediction_confidence import write_design_prediction_confidence
 from core.reasoning.pipeline import SemanticKernelPipeline
 from llm.ollama_client import DeterministicProvider
 
@@ -88,7 +89,7 @@ def main() -> None:
     assert result.validation_report.hard_violations == 1
 
     summary = {
-        "phase": "8.6-8.8",
+        "phase": "8.6-8.9",
         "rod_m4_eligible": rod_packet.get("eligible_for_upgrade"),
         "bmep_m4_eligible": bmep_mat.get("eligible_for_upgrade"),
         "material_m4_eligible": mat_packet.get("eligible_for_upgrade"),
@@ -102,9 +103,13 @@ def main() -> None:
         "policy": "Evidence campaigns complete. No automatic M4 promotions.",
         "next": "Acquire absolute rod masses / mapped BMEP distributions before promote M3→M4.",
     }
+    conf_path = write_design_prediction_confidence(
+        out, physics=result.physics_analysis.model_dump()
+    )
+    summary["design_prediction_confidence"] = str(conf_path)
     (out / "phase86_88_summary.json").write_text(json.dumps(summary, indent=2, default=str))
     print(json.dumps(summary, indent=2))
-    print("Phases 8.6–8.8 campaign sweep complete")
+    print("Phases 8.6–8.9 campaign sweep complete")
 
 
 if __name__ == "__main__":

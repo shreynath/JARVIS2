@@ -23,6 +23,7 @@ from core.verification.uncertainty import run_uncertainty_analysis
 from core.verification.bmep_campaign import write_bmep_campaign_reports
 from core.verification.rod_campaign import write_rod_campaign_reports
 from core.verification.material_validation import write_material_campaign_reports
+from core.verification.prediction_confidence import write_design_prediction_confidence
 from core.verification.upgrade_report import write_model_upgrade_report
 from verification.impact_analysis import write_model_impact_report
 from verification.reality_auditor import run_reality_audit
@@ -54,6 +55,7 @@ def main() -> None:
     write_rod_campaign_reports(out_dir)
     write_bmep_campaign_reports(out_dir)
     write_material_campaign_reports(out_dir)
+    write_design_prediction_confidence(out_dir)
     print(f"wrote {impact_path}")
     print(f"wrote {out_dir / 'maturity_roadmap.json'}")
     print(f"wrote {out_dir / 'maturity_scorecard.json'}")
@@ -61,6 +63,7 @@ def main() -> None:
     print(f"wrote {out_dir / 'rod_validation_report.json'}")
     print(f"wrote {out_dir / 'bmep_campaign_report.json'}")
     print(f"wrote {out_dir / 'material_validation_report.json'}")
+    print(f"wrote {out_dir / 'design_prediction_confidence.json'}")
 
     report = run_reality_audit(out_dir)
     out = out_dir / "reality_audit.json"
