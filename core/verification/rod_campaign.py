@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from core.verification.campaign_readiness import check_campaign_ready
 from core.verification.datasets.rod_validation.loader import load_rod_cases, rod_dataset_inventory
 from core.verification.model_maturity import (
     M4_MIN_EXTERNAL_CASES,
@@ -71,6 +72,7 @@ def build_rod_validation_report() -> dict[str, Any]:
         "inventory": inventory,
         "verification": verification,
         "models": models,
+        "campaign_readiness": check_campaign_ready("rod_stress"),
         "policy": "Reports evidence readiness. Does not mutate MODEL_REGISTRY.",
     }
 

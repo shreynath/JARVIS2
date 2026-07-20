@@ -62,7 +62,7 @@ def build_evidence_collection_plan() -> dict[str, Any]:
         bmep_needed[family] = {"current": complete, "target": target}
 
     return {
-        "phase": "9.0",
+        "phase": "9.5",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "policy": "Tracks missing external evidence — never inflates maturity.",
         "rod_stress": {"needed": rod_stress_needed},
@@ -103,7 +103,7 @@ def build_m4_readiness_dashboard() -> dict[str, Any]:
     missing_rod = [r["field"] for r in rod if r["current"] < r["target"]]
 
     return {
-        "phase": "9.0",
+        "phase": "9.5",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "title": "M4 READINESS",
         "histogram": {

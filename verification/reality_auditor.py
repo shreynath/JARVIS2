@@ -534,4 +534,36 @@ def run_reality_audit(output_dir: Path | str = "output") -> dict[str, Any]:
         "model_closure": _load(out / "model_closure_report.json"),
         "bmep_validation_present": (out / "bmep_validation.json").exists(),
         "uncertainty_propagation_present": (out / "uncertainty_propagation.json").exists(),
+        "evidence_state": _evidence_state_slice(),
+        "maturity_progress": _maturity_progress_slice(),
     }
+
+
+def _evidence_state_slice() -> dict[str, Any]:
+    try:
+        from core.verification.evidence_audit import build_evidence_state
+
+        return build_evidence_state()
+    except Exception:
+        return {
+            "validated_cases": 0,
+            "pending_cases": 0,
+            "rejected_cases": 0,
+            "m4_ready_models": 0,
+        }
+
+
+def _maturity_progress_slice() -> dict[str, Any]:
+    try:
+        from core.verification.maturity_registry import build_maturity_progress
+
+        return build_maturity_progress()
+    except Exception:
+        return {
+            "rod_stress": {
+                "current": "M3",
+                "evidence_cases": 0,
+                "required_cases": 10,
+                "m4_ready": False,
+            }
+        }

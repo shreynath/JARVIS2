@@ -5,6 +5,7 @@ __pycache__/
 output/
 core/verification/evidence_store/pending/*.json
 core/verification/evidence_store/approved/*.json
+core/verification/evidence_store/rejected/*.json
 *.egg-info/
 .venv/
 .env

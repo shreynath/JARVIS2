@@ -1,0 +1,5 @@
+{
+  "phase": "10.0",
+  "promotions": {},
+  "policy": "M4 promotions only via scripts/promote_m4_model.py after campaign eligibility. Empty until a model earns M4."
+}

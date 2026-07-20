@@ -72,10 +72,12 @@ def _valid_record(**overrides) -> RawEvidenceRecord:
 def _isolate_evidence_store(tmp_path, monkeypatch):
     pending = tmp_path / "pending"
     approved = tmp_path / "approved"
-    pending.mkdir()
-    approved.mkdir()
+    rejected = tmp_path / "rejected"
+    for d in (pending, approved, rejected):
+        d.mkdir()
     monkeypatch.setattr("core.verification.evidence_store.PENDING_DIR", pending)
     monkeypatch.setattr("core.verification.evidence_store.APPROVED_DIR", approved)
+    monkeypatch.setattr("core.verification.evidence_store.REJECTED_DIR", rejected)
     monkeypatch.setattr("core.verification.evidence_store.STORE_ROOT", tmp_path)
     yield
 
@@ -248,7 +250,7 @@ def test_write_rod_cases_json(tmp_path: Path):
 
 def test_evidence_collection_plan_shape():
     plan = build_evidence_collection_plan()
-    assert plan["phase"] == "9.0"
+    assert plan["phase"] == "9.5"
     assert "rod_stress" in plan
     fields = {x["field"] for x in plan["rod_stress"]["needed"]}
     assert "piston_mass_g" in fields
@@ -279,7 +281,7 @@ def test_evidence_audit_shape():
 def test_write_evidence_audit(tmp_path: Path):
     path = write_evidence_audit(tmp_path)
     data = json.loads(path.read_text())
-    assert data["phase"] == "9.0"
+    assert data["phase"] == "9.5"
 
 
 # --- Maturity isolation -----------------------------------------------------
